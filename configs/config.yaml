@@ -1,0 +1,302 @@
+# =============================================================================
+# NHANES Periodontitis ML Project Configuration
+# Author: Francisco Teixeira Barbosa (Cisco)
+# Purpose: Central configuration for reproducible ML pipeline
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# NHANES Cycles & Temporal Split Strategy
+# -----------------------------------------------------------------------------
+cycles:
+  all: ["2011_2012", "2013_2014", "2015_2016", "2017_2018"]
+  
+temporal_split:
+  train: ["2011_2012", "2013_2014"]  # ~7,000 participants
+  validation: ["2015_2016"]           # ~3,500 participants
+  test: ["2017_2018"]                 # ~3,500 participants
+
+# Cycle suffix mapping for NHANES URLs
+cycle_suffixes:
+  "2011_2012": "_G"
+  "2013_2014": "_H"
+  "2015_2016": "_I"
+  "2017_2018": "_J"
+
+# -----------------------------------------------------------------------------
+# NHANES Data Components & URLs
+# -----------------------------------------------------------------------------
+base_url: "https://wwwn.cdc.gov/Nchs/Nhanes"
+
+# Components needed for each cycle (file prefix → component name)
+components:
+  DEMO: "demographics"           # Age, sex, education, race, survey weights
+  BMX: "body_measures"           # BMI, waist circumference
+  BPX: "blood_pressure"          # Systolic/diastolic BP
+  SMQ: "smoking"                 # Smoking history
+  ALQ: "alcohol"                 # Alcohol consumption
+  OHQ: "oral_health_questionnaire"  # Dental visits, flossing, mobile teeth
+  OHXPER: "periodontal_exam"     # Full-mouth pocket depth & attachment loss
+  GLU: "glucose"                 # Fasting plasma glucose
+  TRIGLY: "triglycerides"        # Serum triglycerides
+  HDL: "hdl_cholesterol"         # HDL cholesterol
+
+# -----------------------------------------------------------------------------
+# Bashir et al. (2022) 15 Predictors
+# -----------------------------------------------------------------------------
+predictors:
+  demographics:
+    - name: "age"
+      nhanes_var: "RIDAGEYR"
+      type: "continuous"
+      unit: "years"
+      
+    - name: "sex"
+      nhanes_var: "RIAGENDR"
+      type: "binary"
+      coding: "1=Male, 2=Female"
+      
+    - name: "education"
+      nhanes_var: "DMDEDUC2"
+      type: "binary"
+      coding: "< High school (1-2) vs >= High school (3-5)"
+  
+  health_behaviors:
+    - name: "smoking_status"
+      nhanes_var: "SMQ040"  # Do you now smoke cigarettes?
+      type: "binary"
+      coding: "Never vs Former/Current"
+      
+    - name: "alcohol_consumption"
+      nhanes_var: "ALQ130"  # Avg # alcoholic drinks/day in past 12 months
+      type: "binary"
+      coding: "Never vs Former/Current"
+  
+  metabolic_health:
+    - name: "bmi"
+      nhanes_var: "BMXBMI"
+      type: "continuous"
+      unit: "kg/m²"
+      
+    - name: "waist_circumference"
+      nhanes_var: "BMXWAIST"
+      type: "continuous"
+      unit: "cm"
+      
+    - name: "systolic_bp"
+      nhanes_var: "BPXSY1"  # Use first reading
+      type: "continuous"
+      unit: "mmHg"
+      
+    - name: "diastolic_bp"
+      nhanes_var: "BPXDI1"  # Use first reading
+      type: "continuous"
+      unit: "mmHg"
+      
+    - name: "fasting_glucose"
+      nhanes_var: "LBXGLU"
+      type: "continuous"
+      unit: "mg/dL"
+      note: "Requires fasting subsample; use WTSAF2YR weight for sensitivity analysis"
+      
+    - name: "triglycerides"
+      nhanes_var: "LBXTR"
+      type: "continuous"
+      unit: "mg/dL"
+      
+    - name: "hdl_cholesterol"
+      nhanes_var: "LBDHDD"
+      type: "continuous"
+      unit: "mg/dL"
+  
+  oral_health:
+    - name: "dental_visit_last_year"
+      nhanes_var: "OHQ030"  # When last dental visit?
+      type: "binary"
+      coding: "Within 1 year (1) vs > 1 year (2+)"
+      
+    - name: "mobile_teeth"
+      nhanes_var: "OHQ680"  # Noticed loose teeth?
+      type: "binary"
+      coding: "Yes vs No"
+      
+    - name: "uses_floss"
+      nhanes_var: "OHQ620"  # Days used floss in past 7 days
+      type: "binary"
+      coding: ">= 1 day vs 0 days"
+
+# -----------------------------------------------------------------------------
+# Survey Weights
+# -----------------------------------------------------------------------------
+survey_weights:
+  exam_weight: "WTMEC2YR"      # Use for general descriptive stats & prevalence
+  fasting_weight: "WTSAF2YR"   # Use for fasting glucose sensitivity analysis
+  note: |
+    NHANES uses complex survey design. For population-level prevalence and 
+    sensitivity analyses, apply survey weights. Main ML training can remain 
+    unweighted, but document this choice and report weighted prevalence tables.
+
+# -----------------------------------------------------------------------------
+# CDC/AAP 2012 Periodontitis Case Definitions
+# -----------------------------------------------------------------------------
+# Reference: Eke et al. (2012) J Periodontol 83(12):1449-1454
+#
+# Measurement sites:
+#   - Pocket Depth (PD): OHXxxPCM (mesial), OHXxxPCD (distal), OHXxxPCS (mid)
+#   - Clinical Attachment Loss (CAL): OHXxxLAM (mesial), OHXxxLAD (distal), OHXxxLAS (mid)
+#   - Where xx = tooth number (02-15 upper, 18-31 lower)
+#   - Exclude third molars: 01, 16, 17, 32
+#
+# Interproximal sites = mesial + distal ONLY (exclude mid-facial/mid-lingual)
+
+periodontitis_definitions:
+  severe:
+    criteria:
+      - ">= 2 interproximal sites with CAL >= 6 mm on different teeth"
+      - ">= 1 interproximal site with PD >= 5 mm"
+    logic: "AND"
+  
+  moderate:
+    criteria:
+      - ">= 2 interproximal sites with CAL >= 4 mm on different teeth"
+      - ">= 2 interproximal sites with PD >= 5 mm on different teeth"
+    logic: "OR"
+  
+  mild:
+    criteria:
+      - ">= 2 interproximal sites with CAL >= 3 mm AND >= 2 interproximal sites with PD >= 4 mm on different teeth"
+      - "OR one site with PD >= 5 mm"
+    logic: "Complex (see Eke 2012)"
+  
+  notes:
+    - "Enforce 'on different teeth' where specified"
+    - "Interproximal = mesial + distal only"
+    - "Exclude third molars"
+    - "Binary label: Any periodontitis (mild+moderate+severe) vs None"
+
+# -----------------------------------------------------------------------------
+# Model Hyperparameter Search Spaces (Conservative Ranges)
+# -----------------------------------------------------------------------------
+optuna:
+  n_trials: 60  # Can increase to 100+ if time permits
+  timeout: null
+  direction: "maximize"
+  metric: "roc_auc"
+  cv_folds: 5
+  early_stopping_rounds: 50
+  
+  xgboost:
+    n_estimators: [100, 500]
+    max_depth: [3, 8]
+    learning_rate: [0.01, 0.1]  # log scale
+    subsample: [0.7, 1.0]
+    colsample_bytree: [0.6, 1.0]
+    min_child_weight: [1, 10]
+    reg_lambda: [0, 10]
+    reg_alpha: [0, 5]
+    scale_pos_weight: "auto"  # Compute from class imbalance
+  
+  catboost:
+    iterations: [300, 1000]
+    depth: [4, 8]
+    learning_rate: [0.01, 0.1]  # log scale
+    l2_leaf_reg: [1, 10]
+    bagging_temperature: [0, 1]
+    border_count: [32, 254]
+    class_weights: "auto"  # Tie to imbalance
+  
+  lightgbm:
+    num_leaves: [15, 63]
+    max_depth: [3, 8]
+    learning_rate: [0.01, 0.1]  # log scale
+    n_estimators: [300, 800]
+    feature_fraction: [0.6, 1.0]
+    bagging_fraction: [0.7, 1.0]
+    bagging_freq: [1, 5]
+    min_child_samples: [10, 100]
+    lambda_l1: [0, 5]
+    lambda_l2: [0, 10]
+    is_unbalance: true
+
+# -----------------------------------------------------------------------------
+# Evaluation Metrics
+# -----------------------------------------------------------------------------
+metrics:
+  primary: "roc_auc"
+  secondary:
+    - "pr_auc"
+    - "brier_score"
+    - "accuracy"
+    - "sensitivity"
+    - "specificity"
+    - "precision"
+    - "f1_score"
+
+# Threshold selection policy on Validation set
+threshold_policy: "recall_0.80"  # Options: "youden", "recall_0.80", "f1_max"
+
+# -----------------------------------------------------------------------------
+# Plotting Style (Periospot Brand Colors)
+# -----------------------------------------------------------------------------
+plotting:
+  palette:
+    periospot_blue: "#15365a"
+    mystic_blue: "#003049"
+    periospot_red: "#6c1410"
+    crimson_blaze: "#a92a2a"
+    vanilla_cream: "#f7f0da"
+    black: "#000000"
+    white: "#ffffff"
+  
+  # Default palette order for categorical plots
+  default_colors:
+    - "#15365a"  # periospot_blue
+    - "#003049"  # mystic_blue
+    - "#6c1410"  # periospot_red
+    - "#a92a2a"  # crimson_blaze
+    - "#f7f0da"  # vanilla_cream
+  
+  matplotlib:
+    font_family: "DejaVu Sans"
+    title_size: 16
+    label_size: 12
+    tick_size: 10
+    figure_dpi: 300
+    figure_format: "png"
+
+# -----------------------------------------------------------------------------
+# Output Paths
+# -----------------------------------------------------------------------------
+paths:
+  data_raw: "data/raw"
+  data_processed: "data/processed"
+  figures: "figures"
+  models: "models"
+  results: "results"
+  artifacts: "artifacts"
+  logs: "logs"
+  reports: "reports"
+
+# -----------------------------------------------------------------------------
+# Reproducibility
+# -----------------------------------------------------------------------------
+reproducibility:
+  random_seed: 42
+  log_versions: true
+  save_git_hash: true
+  
+# -----------------------------------------------------------------------------
+# Age Filter (adults only, matching Bashir et al.)
+# -----------------------------------------------------------------------------
+inclusion_criteria:
+  min_age: 30
+  max_age: null  # No upper limit
+
+# -----------------------------------------------------------------------------
+# Missing Data Strategy
+# -----------------------------------------------------------------------------
+missing_data:
+  numeric_imputation: "median"  # Fit on train only
+  categorical_imputation: "most_frequent"
+  scaling: "standard"  # StandardScaler for non-tree baselines only
+  note: "Tree-based models (XGB/CatBoost/LGBM) do not require scaling"
+
