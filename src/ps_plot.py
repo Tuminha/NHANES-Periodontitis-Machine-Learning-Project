@@ -29,14 +29,20 @@ def load_config() -> Dict:
     
     Returns:
         Dict containing full configuration including plotting palette
-    
-    TODO: Implement YAML loading with error handling
-    TODO: Add validation that plotting.palette exists
     """
-    # TODO: Load YAML file
-    # TODO: Handle FileNotFoundError gracefully
-    # TODO: Return config dict
-    pass
+    config_path = Path(__file__).parent.parent / "configs" / "config.yaml"
+    
+    try:
+        with open(config_path, 'r') as f:
+            config = yaml.safe_load(f)
+        return config
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"Configuration file not found at {config_path}. "
+            "Please ensure configs/config.yaml exists."
+        )
+    except yaml.YAMLError as e:
+        raise ValueError(f"Error parsing YAML configuration: {e}")
 
 
 def get_palette() -> Dict[str, str]:
@@ -52,14 +58,24 @@ def get_palette() -> Dict[str, str]:
             vanilla_cream: #f7f0da
             black: #000000
             white: #ffffff
-    
+            classic_periospotblue: #0031af
+            periospot_light_blue: #0297ed
+            periospot_dark_blue: #02011e
+            periospot_yellow: #ffc430
+            periospot_bright_blue: #1040dd
     TODO: Extract palette from config
     TODO: Return as dict with color_name -> hex_code
     """
-    # TODO: Call load_config()
-    # TODO: Extract config['plotting']['palette']
-    # TODO: Return palette dict
-    pass
+    config = load_config()
+    palette = config.get('plotting', {}).get('palette', {})
+    
+    if not palette:
+        raise ValueError(
+            "No palette found in config. "
+            "Ensure config.yaml contains 'plotting.palette' section."
+        )
+    
+    return palette
 
 
 def get_default_colors() -> List[str]:
@@ -68,12 +84,16 @@ def get_default_colors() -> List[str]:
     
     Returns:
         List of hex color codes in priority order
-    
-    TODO: Extract default_colors from config
     """
-    # TODO: Load config
-    # TODO: Return config['plotting']['default_colors']
-    pass
+    config = load_config()
+    default_colors = config.get('plotting', {}).get('default_colors', [])
+    
+    if not default_colors:
+        # Fallback to palette values if default_colors not specified
+        palette = get_palette()
+        default_colors = list(palette.values())
+    
+    return default_colors
 
 
 def set_style() -> None:
@@ -87,17 +107,29 @@ def set_style() -> None:
         - Seaborn context and palette
     
     Call this once at the start of your notebook.
-    
-    TODO: Load font settings from config
-    TODO: Apply via plt.rcParams and sns.set_context()
     """
-    # TODO: Load config['plotting']['matplotlib']
-    # TODO: Set plt.rcParams['font.family']
-    # TODO: Set plt.rcParams['font.size'], axes.titlesize, axes.labelsize, xtick.labelsize
-    # TODO: Set plt.rcParams['figure.dpi']
-    # TODO: Call sns.set_context() with appropriate settings
-    # TODO: Set seaborn palette to default_colors
-    pass
+    config = load_config()
+    mpl_config = config.get('plotting', {}).get('matplotlib', {})
+    
+    # Font settings
+    plt.rcParams['font.family'] = mpl_config.get('font_family', 'DejaVu Sans')
+    plt.rcParams['axes.titlesize'] = mpl_config.get('title_size', 16)
+    plt.rcParams['axes.labelsize'] = mpl_config.get('label_size', 12)
+    plt.rcParams['xtick.labelsize'] = mpl_config.get('tick_size', 10)
+    plt.rcParams['ytick.labelsize'] = mpl_config.get('tick_size', 10)
+    
+    # Figure quality
+    plt.rcParams['figure.dpi'] = mpl_config.get('figure_dpi', 300)
+    plt.rcParams['savefig.dpi'] = mpl_config.get('figure_dpi', 300)
+    plt.rcParams['savefig.bbox'] = 'tight'
+    
+    # Set seaborn style and palette
+    sns.set_context("notebook", font_scale=1.0)
+    sns.set_style("whitegrid")
+    
+    # Apply Periospot color palette
+    default_colors = get_default_colors()
+    sns.set_palette(default_colors)
 
 
 def styled_fig_ax(figsize: tuple = (10, 6), **kwargs):
@@ -110,14 +142,15 @@ def styled_fig_ax(figsize: tuple = (10, 6), **kwargs):
     
     Returns:
         fig, ax: Matplotlib figure and axes objects
-    
-    TODO: Call plt.subplots with appropriate styling
-    TODO: Optionally apply grid, spines, etc.
     """
-    # TODO: Create fig, ax = plt.subplots(figsize=figsize, **kwargs)
-    # TODO: Apply any default styling (grid, spines)
-    # TODO: Return fig, ax
-    pass
+    fig, ax = plt.subplots(figsize=figsize, **kwargs)
+    
+    # Apply minimal styling
+    ax.grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
+    return fig, ax
 
 
 def save_figure(
@@ -136,17 +169,19 @@ def save_figure(
         dpi: DPI override (defaults to config value, typically 300)
         bbox_inches: Bounding box mode (default "tight")
         **kwargs: Additional arguments for fig.savefig()
-    
-    TODO: Load DPI from config if not provided
-    TODO: Create parent directory if missing
-    TODO: Save with fig.savefig()
-    TODO: Print confirmation message
     """
-    # TODO: If dpi is None, load from config
-    # TODO: Ensure Path(filepath).parent.mkdir(parents=True, exist_ok=True)
-    # TODO: fig.savefig(filepath, dpi=dpi, bbox_inches=bbox_inches, **kwargs)
-    # TODO: print(f"Saved figure: {filepath}")
-    pass
+    # Load DPI from config if not provided
+    if dpi is None:
+        config = load_config()
+        dpi = config.get('plotting', {}).get('matplotlib', {}).get('figure_dpi', 300)
+    
+    # Create parent directory if it doesn't exist
+    filepath_obj = Path(filepath)
+    filepath_obj.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Save figure
+    fig.savefig(filepath, dpi=dpi, bbox_inches=bbox_inches, **kwargs)
+    print(f"📊 Saved figure: {filepath}")
 
 
 def apply_periospot_colors_to_ax(ax, color_key: str = "periospot_blue") -> None:
@@ -161,15 +196,28 @@ def apply_periospot_colors_to_ax(ax, color_key: str = "periospot_blue") -> None:
     Args:
         ax: Matplotlib axes object
         color_key: Name of color from palette (e.g., "periospot_blue")
-    
-    TODO: Get color hex from palette
-    TODO: Apply to ax children (bars, lines, collections)
     """
-    # TODO: palette = get_palette()
-    # TODO: color = palette[color_key]
-    # TODO: Iterate over ax.patches (bars), ax.lines, ax.collections
-    # TODO: Set facecolor or color to chosen color
-    pass
+    palette = get_palette()
+    
+    if color_key not in palette:
+        raise ValueError(
+            f"Color '{color_key}' not found in palette. "
+            f"Available colors: {list(palette.keys())}"
+        )
+    
+    color = palette[color_key]
+    
+    # Apply to bar plots
+    for patch in ax.patches:
+        patch.set_facecolor(color)
+    
+    # Apply to line plots
+    for line in ax.lines:
+        line.set_color(color)
+    
+    # Apply to scatter plots and other collections
+    for collection in ax.collections:
+        collection.set_color(color)
 
 
 # =============================================================================

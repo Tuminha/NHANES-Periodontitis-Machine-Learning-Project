@@ -302,29 +302,37 @@ J Periodontol. 2012;83(12):1449-1454.
 
 ## 🛠 Technical Stack
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| Data Processing | Pandas, NumPy | ETL & feature engineering |
-| Visualization | Matplotlib, Seaborn | EDA & publication plots |
-| ML Framework | Scikit-learn | Pipelines, baselines, metrics |
-| Gradient Boosting | XGBoost, CatBoost, LightGBM | Primary models |
-| Hyperparameter Tuning | Optuna | Bayesian optimization |
-| Interpretability | SHAP | Feature importance |
-| Versioning | Git, DVC (planned) | Reproducibility |
-| Testing | Pytest | Unit tests |
+| Component | Technology | Version | Purpose |
+|-----------|------------|---------|---------|
+| Data Processing | Pandas, NumPy | 2.3.2, 2.3.5 | ETL & feature engineering |
+| Visualization | Matplotlib, Seaborn | Latest | EDA & publication plots |
+| ML Framework | Scikit-learn | 1.7.1 | Pipelines, baselines, metrics |
+| Gradient Boosting | XGBoost | 3.1.1 | Primary model |
+| Gradient Boosting | CatBoost | 1.2.8 | Primary model |
+| Gradient Boosting | LightGBM | 4.6.0 | Primary model |
+| Hyperparameter Tuning | Optuna | 4.6.0 | Bayesian optimization |
+| Interpretability | SHAP | 0.50.0 | Feature importance |
+| Versioning | Git, DVC (planned) | - | Reproducibility |
+| Testing | Pytest | - | Unit tests |
 
 ---
 
 ## 🚀 Roadmap
 
-- [x] Project setup & data download
+- [x] Project setup & environment configuration
+- [x] Periospot brand styling implementation
+- [x] Import structure & dependency management
 - [x] CDC/AAP case definition implementation
 - [x] Temporal split strategy
-- [ ] Baseline model comparison
-- [ ] Gradient boosting with Optuna
-- [ ] SHAP analysis
+- [ ] Data download & preprocessing
+- [ ] Feature engineering (15 Bashir predictors)
+- [ ] Exploratory data analysis
+- [ ] Baseline model comparison (LogReg, RF)
+- [ ] Gradient boosting with Optuna (XGBoost, CatBoost, LightGBM)
+- [ ] SHAP analysis & interpretability
 - [ ] Calibration & decision curves
-- [ ] Survey weights sensitivity
+- [ ] Survey weights sensitivity analysis
+- [ ] Model cards & documentation
 - [ ] Preprint submission
 - [ ] Peer-reviewed publication
 

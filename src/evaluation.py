@@ -27,9 +27,8 @@ from sklearn.metrics import (
     confusion_matrix,
     roc_curve,
     precision_recall_curve,
-    calibration_curve,
 )
-from sklearn.calibration import CalibratedClassifierCV
+from sklearn.calibration import CalibratedClassifierCV, calibration_curve
 from typing import Dict, Tuple, Optional
 
 
