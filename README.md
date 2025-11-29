@@ -61,7 +61,18 @@ From Polizzi et al. (2024) systematic review: **No studies have systematically t
 - URL: https://wwwn.cdc.gov/nchs/nhanes/
 - Free, publicly available
 - Full-mouth periodontal examinations (2011–2018)
-- ~14,000 adults aged 30+
+- **18,865 adults aged 30+** (after merging and filtering)
+
+**Participant Distribution:**
+- 2011-2012: 4,566 adults
+- 2013-2014: 4,813 adults
+- 2015-2016: 4,745 adults
+- 2017-2018: 4,741 adults
+
+**Temporal Split:**
+- Train: 9,379 participants (2011-2014)
+- Validation: 4,745 participants (2015-2016)
+- Test: 4,741 participants (2017-2018)
 
 ### CDC/AAP Periodontitis Case Definitions
 
@@ -324,9 +335,11 @@ J Periodontol. 2012;83(12):1449-1454.
 - [x] Import structure & dependency management
 - [x] CDC/AAP case definition implementation
 - [x] Temporal split strategy
-- [ ] Data download & preprocessing
+- [x] Data download (40 parquet files across 4 cycles)
+- [x] Data merging & age filtering (adults 30+)
+- [ ] CDC/AAP periodontitis labeling
 - [ ] Feature engineering (15 Bashir predictors)
-- [ ] Exploratory data analysis
+- [ ] Exploratory data analysis & temporal drift detection
 - [ ] Baseline model comparison (LogReg, RF)
 - [ ] Gradient boosting with Optuna (XGBoost, CatBoost, LightGBM)
 - [ ] SHAP analysis & interpretability

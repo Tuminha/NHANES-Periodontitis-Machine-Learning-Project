@@ -25,7 +25,7 @@ cycle_suffixes:
 # -----------------------------------------------------------------------------
 # NHANES Data Components & URLs
 # -----------------------------------------------------------------------------
-base_url: "https://wwwn.cdc.gov/Nchs/Nhanes"
+base_url: "https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public"
 
 # Components needed for each cycle (file prefix → component name)
 components:
@@ -299,4 +299,3 @@ missing_data:
   categorical_imputation: "most_frequent"
   scaling: "standard"  # StandardScaler for non-tree baselines only
   note: "Tree-based models (XGB/CatBoost/LGBM) do not require scaling"
-
