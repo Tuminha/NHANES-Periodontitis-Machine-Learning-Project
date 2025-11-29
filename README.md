@@ -281,13 +281,28 @@ pytest tests/test_labels.py -v
 
 ## 📊 Visualizations
 
-All figures use Periospot brand colors and are saved at 300 DPI for publication:
+All figures use Periospot brand colors and are saved at 300 DPI for publication.
 
-- **ROC & Precision-Recall Curves** (Train/Val/Test)
+### Periodontitis Classification Summary (2011-2014)
+
+<div align="center">
+<img src="figures/01_periodontitis_classification_summary.png" alt="NHANES Periodontitis Classification Results" width="800"/>
+</div>
+
+**Key Findings:**
+- **Consistent prevalence:** 68.6% (2011-2012) vs 68.0% (2013-2014)
+- **Strong signal:** 9,379 participants with complete data
+- **Severity distribution:** 85% severe, 7% moderate, 8% mild
+- **Data quality confirmed:** Both cycles suitable for pooled analysis
+
+### Additional Figures (To Be Generated):
+
+- **ROC & Precision-Recall Curves** (5-fold CV results)
+- **Model Comparison Boxplots** (AUC distributions across folds)
 - **SHAP Beeswarm Plots** (feature importance)
-- **Calibration Curves** (before/after isotonic scaling)
+- **Calibration Curves** (reliability diagrams)
 - **Decision Curves** (net benefit analysis)
-- **Feature Drift Plots** (temporal stability)
+- **Feature Correlation Matrix**
 
 ---
 
