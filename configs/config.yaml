@@ -5,15 +5,26 @@
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# NHANES Cycles & Temporal Split Strategy
+# NHANES Cycles & Cross-Validation Strategy
 # -----------------------------------------------------------------------------
+# Note: NHANES discontinued full periodontal exams after 2013-2014
+# 2015-2016 and 2017-2018 only have tooth condition codes, not PD/CAL measurements
 cycles:
-  all: ["2011_2012", "2013_2014", "2015_2016", "2017_2018"]
+  all: ["2011_2012", "2013_2014"]  # Only cycles with full periodontal data
+  deprecated: ["2015_2016", "2017_2018"]  # Insufficient periodontal measurements
   
-temporal_split:
-  train: ["2011_2012", "2013_2014"]  # ~7,000 participants
-  validation: ["2015_2016"]           # ~3,500 participants
-  test: ["2017_2018"]                 # ~3,500 participants
+validation_strategy:
+  method: "stratified_kfold"
+  n_folds: 5
+  stratify_by: "has_periodontitis"
+  shuffle: true
+  random_state: 42
+  
+# Note: Original temporal split plan abandoned due to data availability
+# temporal_split:  # DEPRECATED - kept for reference
+#   train: ["2011_2012", "2013_2014"]  # 9,379 participants
+#   validation: ["2015_2016"]           # NO PERIODONTAL DATA
+#   test: ["2017_2018"]                 # NO PERIODONTAL DATA
 
 # Cycle suffix mapping for NHANES URLs
 cycle_suffixes:
@@ -218,21 +229,26 @@ optuna:
     is_unbalance: true
 
 # -----------------------------------------------------------------------------
-# Evaluation Metrics
+# Evaluation Metrics & Reporting
 # -----------------------------------------------------------------------------
 metrics:
-  primary: "roc_auc"
+  primary: "roc_auc"  # For model selection and comparison
   secondary:
-    - "pr_auc"
-    - "brier_score"
+    - "pr_auc"        # Important for imbalanced data
+    - "brier_score"   # Calibration quality
     - "accuracy"
-    - "sensitivity"
-    - "specificity"
-    - "precision"
-    - "f1_score"
-
-# Threshold selection policy on Validation set
-threshold_policy: "recall_0.80"  # Options: "youden", "recall_0.80", "f1_max"
+    - "sensitivity"   # Recall / True Positive Rate
+    - "specificity"   # True Negative Rate  
+    - "precision"     # Positive Predictive Value
+    - "f1_score"      # Harmonic mean of precision/recall
+  
+  # Cross-validation reporting
+  cv_aggregation: "mean"  # Report mean across folds
+  confidence_interval: 0.95  # 95% CI for performance estimates
+  
+# Threshold selection policy (applied to each fold)
+threshold_policy: "youden"  # Options: "youden", "recall_0.80", "f1_max"
+# Note: Youden's J = maximize (sensitivity + specificity - 1)
 
 # -----------------------------------------------------------------------------
 # Plotting Style (Periospot Brand Colors)

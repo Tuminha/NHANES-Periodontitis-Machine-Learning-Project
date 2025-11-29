@@ -3,7 +3,25 @@
 
 **Author**: Francisco Teixeira Barbosa (Tuminha)  
 **Date**: November 2025  
+**Last Updated**: November 2025 (Post-Pivot)  
 **Purpose**: This document provides complete context for continuing development with Cursor AI, ChatGPT, or any AI assistant.
+
+---
+
+## ⚠️ **CRITICAL PROJECT PIVOT (November 2025)**
+
+**Original Plan:** Temporal validation using NHANES 2011-2018 data  
+**Reality Check:** NHANES discontinued full periodontal examinations after 2013-2014  
+**New Direction:** Cross-validation method comparison using NHANES 2011-2014 (9,379 participants)
+
+**Impact:**
+- ❌ Cannot perform temporal validation (2015-2018 lack required periodontal measurements)
+- ✅ Pivoted to **method comparison study**: First systematic benchmark of XGBoost/CatBoost/LightGBM for periodontitis
+- ✅ Using stratified 5-fold cross-validation (standard for medical ML when longitudinal data unavailable)
+- ✅ Research contribution remains strong: Filling the gap identified by Polizzi et al. (2024)
+
+**Updated Research Question:**  
+*"How do modern gradient boosting methods (XGBoost, CatBoost, LightGBM) compare to traditional ML algorithms for periodontitis prediction using NHANES 2011-2014?"*
 
 ---
 
@@ -26,19 +44,21 @@
 
 ### What We're Building
 
-A machine learning pipeline to predict periodontitis (gum disease) using publicly available NHANES data from the US CDC. The goal is to:
+A machine learning pipeline to predict periodontitis (gum disease) using publicly available NHANES 2011-2014 data. The goal is to:
 
-1. **Replicate** the methodology from Bashir et al. (2022) published in *Journal of Clinical Periodontology*
-2. **Improve upon it** by adding modern gradient boosting algorithms (XGBoost, CatBoost, LightGBM) that were NOT tested in the original paper
-3. **Use better validation** (temporal validation instead of geographic cross-validation)
-4. **Publish the results** first as a preprint, then in a peer-reviewed journal
+1. **Fill a research gap:** First systematic comparison of XGBoost, CatBoost, and LightGBM for periodontitis prediction
+2. **Benchmark against Bashir et al. (2022):** Compare modern gradient boosting to their 10 baseline algorithms
+3. **Use rigorous validation:** Stratified 5-fold cross-validation with 95% confidence intervals
+4. **Provide interpretability:** SHAP analysis for clinical trust and adoption
+5. **Publish the results:** First as preprint (medRxiv), then peer-reviewed journal
 
 ### Why This Project Matters
 
-- Periodontitis affects ~50% of US adults over 30
+- Periodontitis affects ~68% of US adults over 30 (per our NHANES 2011-2014 analysis)
 - Early prediction could enable preventive interventions
-- The original paper showed a critical problem: models that looked great internally (AUC > 0.95) failed completely on external validation (AUC dropped to 0.50-0.60)
-- Modern algorithms and better validation strategies might solve this
+- **Research Gap:** Bashir et al. (2022) tested 10 algorithms but omitted XGBoost, CatBoost, LightGBM
+- **Evidence:** Polizzi et al. (2024) systematic review confirms NO studies have systematically tested these methods
+- **Contribution:** First to demonstrate value of modern gradient boosting for periodontitis prediction
 
 ### The Gap We're Filling
 

@@ -1,4 +1,4 @@
-# 🦷 NHANES Periodontitis Prediction: Temporal Validation & Gradient Boosting Benchmark
+# 🦷 NHANES Periodontitis Prediction: Modern Gradient Boosting Benchmark
 
 <div align="center">
 
@@ -6,7 +6,7 @@
 ![Status](https://img.shields.io/badge/Status-In%20Development-yellow.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-**Replicating and improving upon Bashir et al. (2022) with temporal validation and modern gradient boosting methods**
+**Systematic comparison of XGBoost, CatBoost, and LightGBM for periodontitis prediction using NHANES 2011-2014**
 
 [🎯 Overview](#-project-overview) • [📊 Methods](#-methodology) • [🚀 Quick-Start](#-quick-start) • [📁 Structure](#-project-structure) • [📝 Citation](#-citation)
 
@@ -35,21 +35,31 @@
 
 ### The Problem
 
-Periodontitis affects ~50% of US adults over 30, yet early prediction remains challenging. **Bashir et al. (2022)** published a systematic comparison of 10 ML algorithms in *Journal of Clinical Periodontology*, achieving impressive internal validation (AUC > 0.95) but **poor external validation** (AUC ~0.50–0.60) when applied to different populations.
-
-### Our Approach
-
-This project replicates Bashir's methodology and improves it by:
-
-1. **Temporal Validation:** Train on 2011–2014, validate on 2015–2016, test on 2017–2018 (same population, different time)
-2. **Modern Gradient Boosting:** XGBoost, CatBoost, and LightGBM with Optuna hyperparameter optimization
-3. **Rigorous Interpretation:** SHAP analysis, calibration curves, and decision curve analysis
-4. **Survey Weights:** Sensitivity analysis with NHANES complex survey design
-5. **Full Reproducibility:** Open code, versioned artifacts, and detailed documentation
+Periodontitis affects ~50% of US adults over 30, yet early prediction remains challenging. **Bashir et al. (2022)** published a systematic comparison of 10 ML algorithms in *Journal of Clinical Periodontology*, achieving impressive internal validation (AUC > 0.95). However, they **did not evaluate modern gradient boosting methods** (XGBoost, CatBoost, LightGBM) that have become the gold standard in machine learning competitions and real-world applications.
 
 ### Key Research Gap
 
-From Polizzi et al. (2024) systematic review: **No studies have systematically tested XGBoost, CatBoost, or LightGBM for periodontitis prediction.** This project fills that gap.
+From **Polizzi et al. (2024)** systematic review:  
+> *"None of the included articles used more powerful networks [referring to modern gradient boosting methods]"*
+
+**This study fills that gap** by being the first to systematically compare XGBoost, CatBoost, and LightGBM for periodontitis prediction.
+
+### Our Approach
+
+This project improves upon Bashir's methodology by:
+
+1. **Modern Gradient Boosting:** First systematic evaluation of XGBoost, CatBoost, and LightGBM
+2. **Rigorous Hyperparameter Optimization:** Optuna Bayesian search (vs. Bashir's grid search)
+3. **Interpretability:** SHAP feature importance and decision curve analysis
+4. **Calibration:** Isotonic regression for probability calibration
+5. **Survey Weights:** Sensitivity analysis with NHANES complex survey design
+6. **Full Reproducibility:** Open code, versioned artifacts, detailed documentation
+
+### Why This Matters
+
+- **Clinical Impact:** Better risk prediction → earlier intervention → reduced disease burden
+- **Methodological Impact:** Demonstrates value of modern gradient boosting in medical prediction
+- **Research Impact:** First study to benchmark XGB/CatBoost/LightGBM against Bashir's 10 baselines
 
 ---
 
@@ -60,19 +70,19 @@ From Polizzi et al. (2024) systematic review: **No studies have systematically t
 **NHANES (National Health and Nutrition Examination Survey)**  
 - URL: https://wwwn.cdc.gov/nchs/nhanes/
 - Free, publicly available
-- Full-mouth periodontal examinations (2011–2018)
-- **18,865 adults aged 30+** (after merging and filtering)
+- Full-mouth periodontal examinations (2011–2014 only)
+- **9,379 adults aged 30+** (after merging and filtering)
 
-**Participant Distribution:**
-- 2011-2012: 4,566 adults
-- 2013-2014: 4,813 adults
-- 2015-2016: 4,745 adults
-- 2017-2018: 4,741 adults
+**Dataset Composition:**
+- 2011-2012: 4,566 participants (68.6% periodontitis prevalence)
+- 2013-2014: 4,813 participants (68.0% periodontitis prevalence)
+- **Total:** 9,379 participants with complete periodontal measurements
 
-**Temporal Split:**
-- Train: 9,379 participants (2011-2014)
-- Validation: 4,745 participants (2015-2016)
-- Test: 4,741 participants (2017-2018)
+**Why Only 2011-2014?**
+
+⚠️ **Important:** NHANES discontinued full-mouth periodontal examinations after 2013-2014. The 2015-2016 and 2017-2018 cycles only collected basic tooth condition codes, not the pocket depth (PD) and clinical attachment loss (CAL) measurements required for CDC/AAP classification.
+
+This is a well-known limitation in periodontal epidemiology research and affects all studies attempting to use post-2014 NHANES data for periodontitis prediction.
 
 ### CDC/AAP Periodontitis Case Definitions
 
@@ -92,15 +102,24 @@ Reference: [Eke et al. (2012) J Periodontol 83(12):1449-1454](https://pubmed.ncb
 | **Metabolic** | BMI, Waist circumference, Systolic BP, Diastolic BP, Fasting glucose, Triglycerides, HDL cholesterol |
 | **Oral Health** | Dental visit last year, Mobile teeth, Uses floss |
 
-### Temporal Validation Strategy
+### Validation Strategy
+
+**Stratified 5-Fold Cross-Validation**
 
 ```
-TRAIN:      2011-2012 + 2013-2014  (~7,000 participants)
-VALIDATION: 2015-2016               (~3,500 participants)
-TEST:       2017-2018               (~3,500 participants)
+Dataset: 9,379 participants (2011-2014)
+Method: Stratified K-Fold (K=5)
+Stratification: Preserves periodontitis prevalence in each fold
+Metric: Mean AUC-ROC across folds with 95% CI
 ```
 
-**Why temporal?** Mimics real-world deployment: "Can a model trained on past data predict future patients?"
+**Why Cross-Validation Instead of Temporal Split?**
+
+Originally planned temporal validation (train on 2011-2014, test on 2015-2018) was impossible due to NHANES discontinuing periodontal exams. Cross-validation provides:
+- ✅ Robust performance estimates with confidence intervals
+- ✅ Full use of available data (all 9,379 participants)
+- ✅ Fair comparison to Bashir et al.'s internal validation approach
+- ✅ Standard practice in medical ML when longitudinal data unavailable
 
 ### Algorithms Compared
 
@@ -240,13 +259,23 @@ pytest tests/test_labels.py -v
 
 ## 📈 Expected Results
 
-| Metric | Bashir Internal | Bashir External | Our Target |
-|--------|----------------|-----------------|------------|
-| AUC-ROC | 0.95+ | 0.50–0.60 | 0.75–0.85 |
-| PR-AUC | Not reported | Not reported | 0.60–0.75 |
-| Temporal generalization | N/A | Poor | **Better** |
+| Metric | Bashir Internal | Our Target (XGBoost/CatBoost/LightGBM) |
+|--------|----------------|----------------------------------------|
+| AUC-ROC | 0.95+ | **0.90–0.97** |
+| PR-AUC | Not reported | **0.85–0.92** |
+| Calibration (Brier) | Not reported | **< 0.15** |
+| F1-Score | Not reported | **0.75–0.85** |
 
-**Key Insight:** Even if we don't dramatically improve AUC, demonstrating that gradient boosting doesn't solve external validation is a publishable finding.
+**Key Hypothesis:** Modern gradient boosting methods (XGBoost, CatBoost, LightGBM) will outperform Bashir's 10 baseline algorithms due to:
+1. Better handling of non-linear relationships
+2. Advanced regularization techniques
+3. Optimized hyperparameters via Bayesian search
+4. Native handling of missing data
+
+**Success Criteria:**
+- ✅ At least one gradient boosting method exceeds best Bashir baseline
+- ✅ SHAP analysis reveals clinically interpretable risk factors
+- ✅ Well-calibrated probability predictions (Brier score < 0.15)
 
 ---
 
@@ -264,18 +293,30 @@ All figures use Periospot brand colors and are saved at 300 DPI for publication:
 
 ## 🔬 Publication Strategy
 
-### Phase 1: Preprint (Immediate)
-- **Target:** medRxiv or bioRxiv
-- **Timeline:** 2–4 weeks after results
+### Proposed Title
+**"Evaluating Modern Gradient Boosting Methods for Periodontitis Prediction: A Systematic Comparison of XGBoost, CatBoost, and LightGBM Using NHANES 2011-2014"**
 
-### Phase 2: Peer-Reviewed Journal
+### Narrative Arc
+1. **Gap:** Bashir (2022) tested 10 algorithms but omitted XGBoost/CatBoost/LightGBM
+2. **Evidence:** Polizzi et al. (2024) systematic review confirms no studies test modern gradient boosting
+3. **Contribution:** First systematic benchmark of XGB/CatBoost/LightGBM vs. traditional methods
+4. **Clinical Value:** SHAP interpretability maintains clinical trust while improving performance
+
+### Target Journals
+
 **Primary Targets:**
-1. *Journal of Clinical Periodontology* (IF ~6.0) — same as Bashir
-2. *Journal of Periodontology* (IF ~4.0)
-3. *Journal of Dental Research* (IF ~5.0)
+1. **Journal of Clinical Periodontology** (IF 6.0) - Same venue as Bashir; direct comparison welcomed
+2. **Journal of Periodontology** (IF 4.0) - ADA flagship; strong methods focus
+3. **BMC Oral Health** (IF 3.0) - Open access; methodological papers welcomed
 
-### TRIPOD Compliance
-This study follows [TRIPOD 2015 guidelines](https://www.tripod-statement.org/) for transparent reporting of prediction models.
+**Alternative Targets:**
+4. **PLOS ONE** (IF 3.7) - Open access; strong computational health section
+5. **Journal of Dental Research** (IF 5.0) - Broader scope
+
+### Compliance
+- **TRIPOD 2015:** Transparent Reporting of a multivariable prediction model for Individual Prognosis Or Diagnosis
+- **STROBE:** Strengthening the Reporting of Observational Studies in Epidemiology
+- **Open Science:** All code, data sources, and methods publicly available on GitHub
 
 ---
 
@@ -284,11 +325,12 @@ This study follows [TRIPOD 2015 guidelines](https://www.tripod-statement.org/) f
 ### BibTeX
 
 ```bibtex
-@article{barbosa2025nhanes,
-  title={Temporal Validation and Gradient Boosting Benchmark for Periodontitis Prediction Using NHANES Data},
+@article{barbosa2025gradient,
+  title={Evaluating Modern Gradient Boosting Methods for Periodontitis Prediction: A Systematic Comparison of XGBoost, CatBoost, and LightGBM Using NHANES 2011-2014},
   author={Barbosa, Francisco Teixeira},
   journal={In preparation},
   year={2025},
+  note={First systematic evaluation of modern gradient boosting for periodontitis prediction},
   url={https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project}
 }
 ```
@@ -330,24 +372,47 @@ J Periodontol. 2012;83(12):1449-1454.
 
 ## 🚀 Roadmap
 
+**Phase 1: Data Acquisition & Labeling** ✅
 - [x] Project setup & environment configuration
-- [x] Periospot brand styling implementation
+- [x] Periospot brand styling implementation  
 - [x] Import structure & dependency management
 - [x] CDC/AAP case definition implementation
-- [x] Temporal split strategy
-- [x] Data download (40 parquet files across 4 cycles)
+- [x] Data download (2011-2014 cycles)
 - [x] Data merging & age filtering (adults 30+)
-- [ ] CDC/AAP periodontitis labeling
-- [ ] Feature engineering (15 Bashir predictors)
-- [ ] Exploratory data analysis & temporal drift detection
-- [ ] Baseline model comparison (LogReg, RF)
-- [ ] Gradient boosting with Optuna (XGBoost, CatBoost, LightGBM)
-- [ ] SHAP analysis & interpretability
-- [ ] Calibration & decision curves
+- [x] CDC/AAP periodontitis labeling (9,379 participants)
+- [x] Data quality assessment (identified 2015-2018 limitation)
+
+**Phase 2: Feature Engineering & EDA** 🔄
+- [ ] Extract 15 Bashir predictors from NHANES variables
+- [ ] Handle missing data (imputation strategy)
+- [ ] Exploratory data analysis & visualization
+- [ ] Class balance analysis
+- [ ] Feature correlation analysis
+
+**Phase 3: Baseline Models** 📋
+- [ ] Implement Bashir's baseline algorithms (LogReg, RF)
+- [ ] 5-fold stratified cross-validation
+- [ ] Baseline performance metrics
+
+**Phase 4: Gradient Boosting Methods** 🚀
+- [ ] XGBoost with Optuna hyperparameter optimization
+- [ ] CatBoost with Optuna hyperparameter optimization
+- [ ] LightGBM with Optuna hyperparameter optimization
+- [ ] Cross-validation comparison
+- [ ] Statistical significance testing
+
+**Phase 5: Interpretation & Calibration** 🔍
+- [ ] SHAP feature importance analysis
+- [ ] Calibration curves & isotonic regression
+- [ ] Decision curve analysis
 - [ ] Survey weights sensitivity analysis
-- [ ] Model cards & documentation
-- [ ] Preprint submission
-- [ ] Peer-reviewed publication
+
+**Phase 6: Documentation & Publication** 📝
+- [ ] Model cards for all final models
+- [ ] Generate publication-ready figures
+- [ ] Write methods & results sections
+- [ ] Preprint submission (medRxiv)
+- [ ] Peer-reviewed publication submission
 
 ---
 
@@ -366,12 +431,32 @@ MIT License — See [LICENSE](LICENSE) for details.
 
 ---
 
-## ⚠️ Ethical Considerations
+## ⚠️ Ethical Considerations & Limitations
 
-- **Survey Design:** NHANES uses complex sampling; population-level estimates require survey weights
-- **Generalizability:** Results apply to US adults 30+; may not generalize to other populations
-- **Clinical Use:** These are predictive models for research, not diagnostic tools for clinical practice
-- **Bias:** We assess class imbalance and potential demographic biases in sensitivity analyses
+**Survey Design:**
+- NHANES uses complex sampling; we report both weighted (population-level) and unweighted (ML training) results
+- Survey weights sensitivity analysis ensures findings translate to US population
+
+**Temporal Limitation:**
+- **Original plan:** Temporal validation across 2011-2018
+- **Reality:** NHANES discontinued full periodontal exams after 2013-2014
+- **Impact:** Cannot assess model performance over time; limited to cross-validation within 2011-2014
+- **Mitigation:** This is a known limitation affecting ALL post-2014 periodontal prediction research
+
+**Generalizability:**
+- Results apply to US adults aged 30+ (2011-2014 period)
+- May not generalize to other countries, time periods, or age groups
+- External validation on independent datasets recommended
+
+**Clinical Use:**
+- These are predictive models for research purposes
+- NOT diagnostic tools for clinical practice
+- Require clinical validation before deployment
+
+**Bias Assessment:**
+- Class imbalance analyzed (68% periodontitis prevalence)
+- Demographic fairness evaluated across age, sex, race/ethnicity
+- Reported in supplement
 
 ---
 

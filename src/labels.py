@@ -56,22 +56,18 @@ def build_variable_lists() -> Tuple[List[str], List[str]]:
         cal_vars: List of CAL variable names (e.g., ['OHX02LAM', 'OHX02LAD', ...])
     
     Note: Only includes interproximal sites (M, D) for valid teeth.
-    
-    TODO: Loop over VALID_TEETH and INTERPROXIMAL_SITES
-    TODO: Construct variable names following NHANES convention:
-          - PD: OHXxxPCM, OHXxxPCD (where xx is zero-padded tooth number)
-          - CAL: OHXxxLAM, OHXxxLAD
-    TODO: Return two lists
     """
-    # TODO: Initialize pd_vars = [], cal_vars = []
-    # TODO: for tooth in VALID_TEETH:
-    #           for site in ['M', 'D']:
-    #               pd_var = f"OHX{tooth:02d}PC{site}"
-    #               cal_var = f"OHX{tooth:02d}LA{site}"
-    #               pd_vars.append(pd_var)
-    #               cal_vars.append(cal_var)
-    # TODO: Return pd_vars, cal_vars
-    pass
+    pd_vars = []
+    cal_vars = []
+    
+    for tooth in VALID_TEETH:
+        for site in INTERPROXIMAL_SITES:  # M and D only
+            pd_var = f"OHX{tooth:02d}PC{site}"
+            cal_var = f"OHX{tooth:02d}LA{site}"
+            pd_vars.append(pd_var)
+            cal_vars.append(cal_var)
+    
+    return pd_vars, cal_vars
 
 
 def count_sites_meeting_threshold(
@@ -91,17 +87,35 @@ def count_sites_meeting_threshold(
     
     Returns:
         count: Number of sites meeting the condition
-    
-    TODO: Extract values from row[variables]
-    TODO: Drop NaN values
-    TODO: Apply comparison (e.g., >= threshold)
-    TODO: Return count of True values
     """
-    # TODO: values = row[variables].dropna()
-    # TODO: if comparison == ">=":
-    #           mask = values >= threshold
-    # TODO: return mask.sum()
-    pass
+    # Filter to only variables that exist in this row
+    existing_vars = [v for v in variables if v in row.index]
+    
+    if not existing_vars:
+        return 0
+    
+    # Extract values and drop NaN
+    try:
+        values = row[existing_vars].dropna()
+    except KeyError:
+        return 0
+    
+    if len(values) == 0:
+        return 0
+    
+    # Apply comparison
+    if comparison == ">=":
+        mask = values >= threshold
+    elif comparison == ">":
+        mask = values > threshold
+    elif comparison == "<=":
+        mask = values <= threshold
+    elif comparison == "<":
+        mask = values < threshold
+    else:
+        raise ValueError(f"Unknown comparison: {comparison}")
+    
+    return int(mask.sum())
 
 
 def count_teeth_with_any_site_meeting_threshold(
@@ -124,27 +138,38 @@ def count_teeth_with_any_site_meeting_threshold(
     
     Returns:
         count: Number of unique teeth with >= 1 site meeting threshold
-    
-    TODO: Loop over VALID_TEETH
-    TODO: For each tooth, check both mesial and distal sites
-    TODO: If ANY interproximal site >= threshold, count that tooth
-    TODO: Return total count of teeth
     """
-    # TODO: affected_teeth = 0
-    # TODO: for tooth in VALID_TEETH:
-    #           if measurement_type == "PD":
-    #               var_m = f"OHX{tooth:02d}PCM"
-    #               var_d = f"OHX{tooth:02d}PCD"
-    #           elif measurement_type == "CAL":
-    #               var_m = f"OHX{tooth:02d}LAM"
-    #               var_d = f"OHX{tooth:02d}LAD"
-    #           val_m = row.get(var_m, np.nan)
-    #           val_d = row.get(var_d, np.nan)
-    #           if (not pd.isna(val_m) and val_m >= threshold) or \
-    #              (not pd.isna(val_d) and val_d >= threshold):
-    #               affected_teeth += 1
-    # TODO: return affected_teeth
-    pass
+    affected_teeth = 0
+    
+    for tooth in VALID_TEETH:
+        # Build variable names for mesial and distal sites
+        if measurement_type == "PD":
+            var_m = f"OHX{tooth:02d}PCM"
+            var_d = f"OHX{tooth:02d}PCD"
+        elif measurement_type == "CAL":
+            var_m = f"OHX{tooth:02d}LAM"
+            var_d = f"OHX{tooth:02d}LAD"
+        else:
+            raise ValueError(f"Unknown measurement_type: {measurement_type}")
+        
+        # Get values (use .get() to safely handle missing columns)
+        # This returns NaN if the column doesn't exist
+        val_m = row.get(var_m, np.nan)
+        val_d = row.get(var_d, np.nan)
+        
+        # Check if ANY interproximal site meets threshold
+        tooth_affected = False
+        if comparison == ">=":
+            tooth_affected = (not pd.isna(val_m) and val_m >= threshold) or \
+                           (not pd.isna(val_d) and val_d >= threshold)
+        elif comparison == ">":
+            tooth_affected = (not pd.isna(val_m) and val_m > threshold) or \
+                           (not pd.isna(val_d) and val_d > threshold)
+        
+        if tooth_affected:
+            affected_teeth += 1
+    
+    return affected_teeth
 
 
 # =============================================================================
@@ -156,15 +181,16 @@ def classify_severe(row: pd.Series) -> bool:
     Severe periodontitis:
         >= 2 interproximal sites with CAL >= 6 mm (on different teeth) AND
         >= 1 interproximal site with PD >= 5 mm
-    
-    TODO: Use count_teeth_with_any_site_meeting_threshold for CAL >= 6
-    TODO: Use count_sites_meeting_threshold for PD >= 5
-    TODO: Return True if BOTH conditions met
     """
-    # TODO: cal_6_teeth = count_teeth_with_any_site_meeting_threshold(row, "CAL", 6)
-    # TODO: pd_5_sites = count_sites_meeting_threshold(row, build_variable_lists()[0], 5)
-    # TODO: return (cal_6_teeth >= 2) and (pd_5_sites >= 1)
-    pass
+    # Count teeth with CAL >= 6mm (must be on different teeth)
+    cal_6_teeth = count_teeth_with_any_site_meeting_threshold(row, "CAL", 6)
+    
+    # Count sites with PD >= 5mm (any sites)
+    pd_vars, _ = build_variable_lists()
+    pd_5_sites = count_sites_meeting_threshold(row, pd_vars, 5)
+    
+    # Both conditions must be met
+    return (cal_6_teeth >= 2) and (pd_5_sites >= 1)
 
 
 def classify_moderate(row: pd.Series) -> bool:
@@ -172,15 +198,15 @@ def classify_moderate(row: pd.Series) -> bool:
     Moderate periodontitis:
         >= 2 interproximal sites with CAL >= 4 mm (on different teeth) OR
         >= 2 interproximal sites with PD >= 5 mm (on different teeth)
-    
-    TODO: Check CAL >= 4 on >= 2 different teeth
-    TODO: Check PD >= 5 on >= 2 different teeth
-    TODO: Return True if EITHER condition met
     """
-    # TODO: cal_4_teeth = count_teeth_with_any_site_meeting_threshold(row, "CAL", 4)
-    # TODO: pd_5_teeth = count_teeth_with_any_site_meeting_threshold(row, "PD", 5)
-    # TODO: return (cal_4_teeth >= 2) or (pd_5_teeth >= 2)
-    pass
+    # Count teeth with CAL >= 4mm (on different teeth)
+    cal_4_teeth = count_teeth_with_any_site_meeting_threshold(row, "CAL", 4)
+    
+    # Count teeth with PD >= 5mm (on different teeth)
+    pd_5_teeth = count_teeth_with_any_site_meeting_threshold(row, "PD", 5)
+    
+    # Either condition satisfies moderate
+    return (cal_4_teeth >= 2) or (pd_5_teeth >= 2)
 
 
 def classify_mild(row: pd.Series) -> bool:
@@ -192,19 +218,19 @@ def classify_mild(row: pd.Series) -> bool:
         one site with PD >= 5 mm
     
     Note: This is the most complex definition. Implement carefully.
-    
-    TODO: Check CAL >= 3 on >= 2 different teeth
-    TODO: Check PD >= 4 on >= 2 different teeth
-    TODO: Check PD >= 5 on >= 1 site (any site)
-    TODO: Return True if (CAL AND PD condition) OR (PD >= 5)
     """
-    # TODO: cal_3_teeth = count_teeth_with_any_site_meeting_threshold(row, "CAL", 3)
-    # TODO: pd_4_teeth = count_teeth_with_any_site_meeting_threshold(row, "PD", 4)
-    # TODO: pd_5_sites = count_sites_meeting_threshold(row, build_variable_lists()[0], 5)
-    # TODO: condition_a = (cal_3_teeth >= 2) and (pd_4_teeth >= 2)
-    # TODO: condition_b = (pd_5_sites >= 1)
-    # TODO: return condition_a or condition_b
-    pass
+    # Condition A: CAL >= 3mm on >= 2 teeth AND PD >= 4mm on >= 2 teeth
+    cal_3_teeth = count_teeth_with_any_site_meeting_threshold(row, "CAL", 3)
+    pd_4_teeth = count_teeth_with_any_site_meeting_threshold(row, "PD", 4)
+    condition_a = (cal_3_teeth >= 2) and (pd_4_teeth >= 2)
+    
+    # Condition B: At least one site with PD >= 5mm
+    pd_vars, _ = build_variable_lists()
+    pd_5_sites = count_sites_meeting_threshold(row, pd_vars, 5)
+    condition_b = (pd_5_sites >= 1)
+    
+    # Either condition satisfies mild
+    return condition_a or condition_b
 
 
 def label_periodontitis(df: pd.DataFrame) -> pd.DataFrame:
@@ -225,45 +251,54 @@ def label_periodontitis(df: pd.DataFrame) -> pd.DataFrame:
         2. If not severe, check moderate
         3. If not moderate, check mild
         4. Otherwise, none
-    
-    TODO: Apply classification functions row by row
-    TODO: Create perio_class column
-    TODO: Create binary has_periodontitis column
-    TODO: Add assertion checks (e.g., sum of each class > 0)
-    TODO: Print summary statistics (prevalence by class)
     """
-    # TODO: Check that required columns exist in df
-    # TODO: pd_vars, cal_vars = build_variable_lists()
-    # TODO: missing_vars = set(pd_vars + cal_vars) - set(df.columns)
-    # TODO: if missing_vars:
-    #           raise ValueError(f"Missing variables: {missing_vars}")
+    print("🦷 Applying CDC/AAP periodontitis case definitions...")
     
-    # TODO: Apply classification in hierarchy
-    # TODO: df['is_severe'] = df.apply(classify_severe, axis=1)
-    # TODO: df['is_moderate'] = df.apply(classify_moderate, axis=1)
-    # TODO: df['is_mild'] = df.apply(classify_mild, axis=1)
+    # Check that required periodontal variables exist
+    pd_vars, cal_vars = build_variable_lists()
+    missing_vars = set(pd_vars + cal_vars) - set(df.columns)
+    if missing_vars:
+        print(f"⚠️  Warning: {len(missing_vars)} periodontal variables missing from dataset")
+        print(f"   First 10 missing: {list(missing_vars)[:10]}")
+        print("   Proceeding with available data...")
     
-    # TODO: Create perio_class using nested logic
-    # TODO: def assign_class(row):
-    #           if row['is_severe']: return "severe"
-    #           elif row['is_moderate']: return "moderate"
-    #           elif row['is_mild']: return "mild"
-    #           else: return "none"
-    # TODO: df['perio_class'] = df.apply(assign_class, axis=1)
+    # Apply classification functions (in hierarchical order)
+    print("   Classifying severe cases...")
+    df['is_severe'] = df.apply(classify_severe, axis=1)
     
-    # TODO: Create binary label
-    # TODO: df['has_periodontitis'] = df['perio_class'] != "none"
+    print("   Classifying moderate cases...")
+    df['is_moderate'] = df.apply(classify_moderate, axis=1)
     
-    # TODO: Drop intermediate columns
-    # TODO: df.drop(columns=['is_severe', 'is_moderate', 'is_mild'], inplace=True)
+    print("   Classifying mild cases...")
+    df['is_mild'] = df.apply(classify_mild, axis=1)
     
-    # TODO: Print summary
-    # TODO: print("Periodontitis Classification Summary:")
-    # TODO: print(df['perio_class'].value_counts())
-    # TODO: print(f"Prevalence: {df['has_periodontitis'].mean():.2%}")
+    # Create perio_class using hierarchical logic (mutually exclusive)
+    def assign_class(row):
+        if row['is_severe']:
+            return "severe"
+        elif row['is_moderate']:
+            return "moderate"
+        elif row['is_mild']:
+            return "mild"
+        else:
+            return "none"
     
-    # TODO: Return df with new columns
-    pass
+    print("   Assigning final classifications...")
+    df['perio_class'] = df.apply(assign_class, axis=1)
+    
+    # Create binary label
+    df['has_periodontitis'] = df['perio_class'] != "none"
+    
+    # Drop intermediate classification columns
+    df.drop(columns=['is_severe', 'is_moderate', 'is_mild'], inplace=True)
+    
+    # Print summary statistics
+    print("\n📊 Periodontitis Classification Summary:")
+    print(df['perio_class'].value_counts().sort_index())
+    print(f"\n   Overall Prevalence: {df['has_periodontitis'].mean():.2%}")
+    print(f"   Sample Size: {len(df)} participants\n")
+    
+    return df
 
 
 # =============================================================================
