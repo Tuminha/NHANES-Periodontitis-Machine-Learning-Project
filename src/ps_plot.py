@@ -29,10 +29,19 @@ Usage:
     save_figure(fig, "figures/my_plot.png")
 
 Available Color Constants:
-    PERIOSPOT_BLUE, MYSTIC_BLUE, PERIOSPOT_RED, CRIMSON_BLAZE,
-    VANILLA_CREAM, BLACK, WHITE, CLASSIC_PERIOSPOTBLUE,
-    PERIOSPOT_LIGHT_BLUE, PERIOSPOT_DARK_BLUE, PERIOSPOT_YELLOW,
-    PERIOSPOT_BRIGHT_BLUE
+    HEX (strings):
+        PERIOSPOT_BLUE, MYSTIC_BLUE, PERIOSPOT_RED, CRIMSON_BLAZE,
+        VANILLA_CREAM, BLACK, WHITE, CLASSIC_PERIOSPOTBLUE,
+        PERIOSPOT_LIGHT_BLUE, PERIOSPOT_DARK_BLUE, PERIOSPOT_YELLOW,
+        PERIOSPOT_BRIGHT_BLUE
+    
+    RGB (tuples for libraries like missingno):
+        PERIOSPOT_BLUE_RGB, MYSTIC_BLUE_RGB, PERIOSPOT_RED_RGB,
+        CRIMSON_BLAZE_RGB, VANILLA_CREAM_RGB, BLACK_RGB, WHITE_RGB,
+        PERIOSPOT_YELLOW_RGB
+    
+    Utility:
+        hex_to_rgb() - Convert any hex color to RGB tuple
 """
 
 import yaml
@@ -72,7 +81,7 @@ def _load_color_constants():
 # Load palette and create module-level constants
 _PALETTE = _load_color_constants()
 
-# Export color constants (can be imported directly)
+# Export color constants as HEX strings (can be imported directly)
 PERIOSPOT_BLUE = _PALETTE.get('periospot_blue', '#15365a')
 MYSTIC_BLUE = _PALETTE.get('mystic_blue', '#003049')
 PERIOSPOT_RED = _PALETTE.get('periospot_red', '#6c1410')
@@ -85,6 +94,16 @@ PERIOSPOT_LIGHT_BLUE = _PALETTE.get('periospot_light_blue', '#0297ed')
 PERIOSPOT_DARK_BLUE = _PALETTE.get('periospot_dark_blue', '#02011e')
 PERIOSPOT_YELLOW = _PALETTE.get('periospot_yellow', '#ffc430')
 PERIOSPOT_BRIGHT_BLUE = _PALETTE.get('periospot_bright_blue', '#1040dd')
+
+# Export RGB versions (for libraries that require RGB tuples like missingno)
+PERIOSPOT_BLUE_RGB = (0.082, 0.212, 0.353)  # #15365a
+MYSTIC_BLUE_RGB = (0.000, 0.188, 0.286)     # #003049
+PERIOSPOT_RED_RGB = (0.424, 0.078, 0.063)   # #6c1410
+CRIMSON_BLAZE_RGB = (0.663, 0.165, 0.165)   # #a92a2a
+VANILLA_CREAM_RGB = (0.969, 0.941, 0.855)   # #f7f0da
+BLACK_RGB = (0.000, 0.000, 0.000)           # #000000
+WHITE_RGB = (1.000, 1.000, 1.000)           # #ffffff
+PERIOSPOT_YELLOW_RGB = (1.000, 0.769, 0.188)  # #ffc430
 
 
 def load_config() -> Dict:
@@ -107,6 +126,32 @@ def load_config() -> Dict:
         )
     except yaml.YAMLError as e:
         raise ValueError(f"Error parsing YAML configuration: {e}")
+
+
+def hex_to_rgb(hex_color: str) -> tuple:
+    """
+    Convert hex color string to RGB tuple (normalized 0-1).
+    
+    Args:
+        hex_color: Hex color string (e.g., '#15365a' or '15365a')
+    
+    Returns:
+        Tuple of (r, g, b) with values in [0, 1] range
+    
+    Example:
+        >>> hex_to_rgb('#15365a')
+        (0.082, 0.212, 0.353)
+    """
+    # Remove '#' if present
+    hex_color = hex_color.lstrip('#')
+    
+    # Convert to RGB (0-255)
+    r = int(hex_color[0:2], 16)
+    g = int(hex_color[2:4], 16)
+    b = int(hex_color[4:6], 16)
+    
+    # Normalize to 0-1
+    return (r / 255.0, g / 255.0, b / 255.0)
 
 
 def get_palette() -> Dict[str, str]:
