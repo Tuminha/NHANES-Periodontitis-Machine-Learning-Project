@@ -295,6 +295,56 @@ All figures use Periospot brand colors and are saved at 300 DPI for publication.
 - **Severity distribution:** 85% severe, 7% moderate, 8% mild
 - **Data quality confirmed:** Both cycles suitable for pooled analysis
 
+---
+
+### Feature Engineering Results
+
+**Dataset:** `features_full.parquet` (9,379 participants × 19 features)
+
+**15 Bashir Predictors Successfully Extracted:**
+
+| Category | Features | Missing % |
+|----------|----------|-----------|
+| **Demographics** | Age, Sex, Education | ✅ **0% (complete)** |
+| **Metabolic (low missingness)** | BMI, HDL, Waist, Systolic BP, Diastolic BP | 5-12% |
+| **Behaviors (high missingness)** | Alcohol, Smoking | ⚠️ **44-55%** |
+| **Metabolic (high missingness)** | Glucose, Triglycerides | ⚠️ **55%** |
+| **Oral Health** | Dental visit, Mobile teeth, Uses floss | ✅ **0% (complete)** |
+
+**Detailed Missing Data Summary:**
+
+```
+Complete (0%):      age, sex, education, dental_visit, mobile_teeth
+Low (<10%):         bmi (5.2%), waist_cm (9.9%), hdl (9.4%)
+Moderate (10-15%):  systolic_bp (12.0%), diastolic_bp (12.0%)
+High (>40%):        alcohol (44.1%), smoking (54.5%), glucose (55.0%), triglycerides (55.5%)
+```
+
+**⚠️ Data Quality Issues Identified:**
+
+1. **Alcohol variable:** All non-missing values = 1.0 (everyone drinks?) → Likely recoding error or selection bias
+2. **Uses floss variable:** All non-missing values = 1.0 (everyone flosses?) → Same issue
+3. **Diastolic BP:** Minimum = 5.4e-79 mmHg → Data entry error (normal range ~40-120 mmHg)
+
+**Mitigation Strategy:**
+
+These issues will be addressed in **Section 9 (Preprocessing Pipelines)**:
+- Missing data: Median imputation (continuous) + mode imputation (binary)
+- Outliers: Winsorization at 1st/99th percentiles
+- Binary variables with no variance: May exclude from modeling if no information gain
+- High missingness features: Sensitivity analysis (compare models with/without these features)
+
+**Distribution Summary:**
+
+- **Age:** Mean 54.2 ± 15.0 years (range: 30-80)
+- **Sex:** 48.2% male, 51.8% female
+- **Education:** 75.8% ≥ high school
+- **Smoking:** 43.0% ever smoked (among non-missing)
+- **BMI:** Mean 29.3 ± 7.0 kg/m² (overweight category)
+- **Mobile teeth:** 4.9% have mobile teeth (expected for periodontitis)
+
+---
+
 ### Additional Figures (To Be Generated):
 
 - **ROC & Precision-Recall Curves** (5-fold CV results)
@@ -398,8 +448,9 @@ J Periodontol. 2012;83(12):1449-1454.
 - [x] Data quality assessment (identified 2015-2018 limitation)
 
 **Phase 2: Feature Engineering & EDA** 🔄
-- [ ] Extract 15 Bashir predictors from NHANES variables
-- [ ] Handle missing data (imputation strategy)
+- [x] Extract 15 Bashir predictors from NHANES variables
+- [x] Document missing data patterns (44-55% for smoking/alcohol/glucose/triglycerides)
+- [x] Identify data quality issues (alcohol/floss recoding, BP outliers)
 - [ ] Exploratory data analysis & visualization
 - [ ] Class balance analysis
 - [ ] Feature correlation analysis
