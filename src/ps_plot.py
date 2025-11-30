@@ -6,14 +6,33 @@ Purpose: Enforce Periospot brand colors and consistent matplotlib styling
          across all figures generated in this project.
 
 Usage:
-    from src.ps_plot import set_style, get_palette, save_figure
+    # Method 1: Import color constants directly
+    from ps_plot import (
+        set_style, save_figure, 
+        PERIOSPOT_BLUE, CRIMSON_BLAZE, VANILLA_CREAM
+    )
     
     set_style()  # Apply once at notebook start
-    colors = get_palette()
     
     fig, ax = plt.subplots()
-    # ... your plot code ...
+    ax.plot(x, y, color=PERIOSPOT_BLUE)
     save_figure(fig, "figures/my_plot.png")
+    
+    # Method 2: Load palette as dictionary
+    from ps_plot import set_style, get_palette, save_figure
+    
+    set_style()
+    colors = get_palette()  # Returns dict: {'periospot_blue': '#15365a', ...}
+    
+    fig, ax = plt.subplots()
+    ax.bar(x, y, color=colors['periospot_blue'])
+    save_figure(fig, "figures/my_plot.png")
+
+Available Color Constants:
+    PERIOSPOT_BLUE, MYSTIC_BLUE, PERIOSPOT_RED, CRIMSON_BLAZE,
+    VANILLA_CREAM, BLACK, WHITE, CLASSIC_PERIOSPOTBLUE,
+    PERIOSPOT_LIGHT_BLUE, PERIOSPOT_DARK_BLUE, PERIOSPOT_YELLOW,
+    PERIOSPOT_BRIGHT_BLUE
 """
 
 import yaml
@@ -21,6 +40,51 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 from typing import Dict, List, Optional
+
+
+# =============================================================================
+# Color Constants (loaded from config at module import time)
+# =============================================================================
+
+def _load_color_constants():
+    """
+    Load Periospot color constants at module import time.
+    This allows direct usage like: from ps_plot import PERIOSPOT_BLUE
+    """
+    try:
+        config_path = Path(__file__).parent.parent / "configs" / "config.yaml"
+        with open(config_path, 'r') as f:
+            config = yaml.safe_load(f)
+        palette = config.get('plotting', {}).get('palette', {})
+        return palette
+    except Exception:
+        # Fallback colors if config not available
+        return {
+            'periospot_blue': '#15365a',
+            'mystic_blue': '#003049',
+            'periospot_red': '#6c1410',
+            'crimson_blaze': '#a92a2a',
+            'vanilla_cream': '#f7f0da',
+            'black': '#000000',
+            'white': '#ffffff',
+        }
+
+# Load palette and create module-level constants
+_PALETTE = _load_color_constants()
+
+# Export color constants (can be imported directly)
+PERIOSPOT_BLUE = _PALETTE.get('periospot_blue', '#15365a')
+MYSTIC_BLUE = _PALETTE.get('mystic_blue', '#003049')
+PERIOSPOT_RED = _PALETTE.get('periospot_red', '#6c1410')
+CRIMSON_BLAZE = _PALETTE.get('crimson_blaze', '#a92a2a')
+VANILLA_CREAM = _PALETTE.get('vanilla_cream', '#f7f0da')
+BLACK = _PALETTE.get('black', '#000000')
+WHITE = _PALETTE.get('white', '#ffffff')
+CLASSIC_PERIOSPOTBLUE = _PALETTE.get('classic_periospotblue', '#0031af')
+PERIOSPOT_LIGHT_BLUE = _PALETTE.get('periospot_light_blue', '#0297ed')
+PERIOSPOT_DARK_BLUE = _PALETTE.get('periospot_dark_blue', '#02011e')
+PERIOSPOT_YELLOW = _PALETTE.get('periospot_yellow', '#ffc430')
+PERIOSPOT_BRIGHT_BLUE = _PALETTE.get('periospot_bright_blue', '#1040dd')
 
 
 def load_config() -> Dict:
