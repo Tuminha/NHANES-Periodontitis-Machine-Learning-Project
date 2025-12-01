@@ -78,9 +78,10 @@ predictors:
       coding: "Never vs Former/Current"
       
     - name: "alcohol_consumption"
-      nhanes_var: "ALQ130"  # Avg # alcoholic drinks/day in past 12 months
+      nhanes_var: "ALQ101"  # Ever had 12+ drinks in lifetime? (CHANGED from ALQ130)
       type: "binary"
-      coding: "Never vs Former/Current"
+      coding: "Yes (1) vs No (2)"
+      note: "ALQ130 has no zero values (only asked to drinkers); using ALQ101 instead"
   
   metabolic_health:
     - name: "bmi"
