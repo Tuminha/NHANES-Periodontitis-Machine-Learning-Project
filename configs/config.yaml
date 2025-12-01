@@ -93,6 +93,8 @@ predictors:
       nhanes_var: "BMXWAIST"
       type: "continuous"
       unit: "cm"
+      status: "EXCLUDED"
+      reason: "r=0.90 with BMI (multicollinear); removed in data cleaning"
       
     - name: "systolic_bp"
       nhanes_var: "BPXSY1"  # Use first reading
@@ -131,10 +133,11 @@ predictors:
       type: "binary"
       coding: "Yes vs No"
       
-    - name: "uses_floss"
+    - name: "floss_frequency"
       nhanes_var: "OHQ620"  # Days used floss in past 7 days
-      type: "binary"
-      coding: ">= 1 day vs 0 days"
+      type: "ordinal"  # CHANGED from binary to preserve dose-response
+      coding: "1-5 days per week (continuous/ordinal)"
+      note: "Binary had low variance (92% yes); ordinal preserves frequency information"
 
 # -----------------------------------------------------------------------------
 # Survey Weights

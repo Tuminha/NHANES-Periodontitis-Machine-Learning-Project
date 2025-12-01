@@ -93,14 +93,20 @@ Reference: [Eke et al. (2012) J Periodontol 83(12):1449-1454](https://pubmed.ncb
 - **Mild:** ≥2 interproximal sites with CAL ≥3mm AND ≥2 sites with PD ≥4mm
 - **Binary Target:** Any periodontitis vs. None
 
-### 15 Predictors (from Bashir et al.)
+### 14 Predictors (adapted from Bashir et al.)
 
 | Category | Variables |
 |----------|-----------|
 | **Demographics** | Age, Sex, Education |
 | **Behaviors** | Smoking status, Alcohol consumption |
-| **Metabolic** | BMI, Waist circumference, Systolic BP, Diastolic BP, Fasting glucose, Triglycerides, HDL cholesterol |
-| **Oral Health** | Dental visit last year, Mobile teeth, Uses floss |
+| **Metabolic** | BMI, Systolic BP, Diastolic BP, Fasting glucose, Triglycerides, HDL cholesterol |
+| **Oral Health** | Dental visit last year, Mobile teeth, Floss frequency (1-5 days/week) |
+
+**Modifications from Bashir:**
+- ✅ **Alcohol variable changed:** ALQ130 → ALQ101 (binary "ever drinker" due to skip pattern)
+- ✅ **Floss variable improved:** Binary (yes/no) → Ordinal (1-5 days/week) to preserve dose-response
+- ✅ **Waist circumference excluded:** r=0.90 correlation with BMI (redundant)
+- **Result:** 14 predictors (15 original - 1 excluded)
 
 ### Validation Strategy
 
@@ -145,6 +151,43 @@ Originally planned temporal validation (train on 2011-2014, test on 2015-2018) w
 - **Secondary:** PR-AUC, Brier score, Accuracy, Sensitivity, Specificity, Precision, F1
 - **Calibration:** Reliability curves, isotonic/Platt scaling
 - **Interpretability:** SHAP beeswarm and feature importance plots
+
+### Data Quality & Cleaning
+
+**Issues Identified During EDA:**
+
+1. **Alcohol Variable (ALQ130)** → Switched to ALQ101
+   - Issue: 100% of non-missing values = 1 (zero variance)
+   - Root cause: ALQ130 (avg drinks/day) only asked to confirmed drinkers
+   - Solution: Use ALQ101 ("Ever had 12+ drinks?") as true binary variable
+   - Result: Proper distribution (72% yes, 28% no)
+
+2. **Floss Variable (OHQ620)** → Changed from binary to ordinal
+   - Issue: Binary encoding had low variance (92% yes, 8% no)
+   - Root cause: Treating days/week as binary loses information
+   - Solution: Keep as ordinal (1-5 days/week) to preserve dose-response
+   - Benefit: 5x more variance, better ML signal
+
+3. **Diastolic BP Outliers** → Winsorized
+   - Issue: Outliers at 0 mmHg and 5.4e-79 (data entry errors)
+   - Solution: Winsorized to physiological range [40, 120] mmHg
+   - Impact: 86 outliers corrected
+
+4. **Triglycerides Outliers** → Winsorized
+   - Issue: Extreme outliers (max 4,233 mg/dL)
+   - Solution: Winsorized at 99th percentile (~500 mg/dL)
+   - Impact: 42 extreme outliers capped
+
+5. **Waist Circumference** → Excluded
+   - Issue: r=0.90 correlation with BMI (multicollinearity)
+   - Solution: Removed (keep BMI as more clinically standard)
+   - Result: 15 → 14 predictors
+
+**Data Cleaning Impact:**
+- ✅ Improved variable quality and variance
+- ✅ Physiologically plausible values
+- ✅ Reduced multicollinearity
+- ✅ More robust models expected
 
 ---
 
