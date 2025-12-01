@@ -46,11 +46,11 @@ data/processed/*.parquet
 data/processed/*.csv
 
 # Project-specific: Generated artifacts
-figures/*.png
-figures/*.pdf
+# figures/*.png  # DISABLED: We want publication figures in repo
+# figures/*.pdf  # DISABLED: We want publication figures in repo
 models/*.pkl
 models/*.json
-results/*.json
+# results/*.json  # DISABLED: We want result files in repo for reproducibility
 results/*.csv
 artifacts/*.pkl
 artifacts/*.npy

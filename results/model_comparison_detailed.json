@@ -1,0 +1,146 @@
+{
+  "summary": [
+    {
+      "Model": "CatBoost",
+      "Mean AUC": 0.7070820565351492,
+      "Std AUC": 0.014422001891573865,
+      "Mean PR-AUC": 0.8146435479998203,
+      "Std PR-AUC": 0.007607395969512256,
+      "Mean Accuracy": 0.7313138877043354,
+      "Mean Precision": 0.7320844084093749,
+      "Mean Recall": 0.9570647931303669,
+      "Mean F1": 0.8295313134392472
+    },
+    {
+      "Model": "LightGBM",
+      "Mean AUC": 0.7061896050576768,
+      "Std AUC": 0.012031111174934396,
+      "Mean PR-AUC": 0.8133446133551328,
+      "Std PR-AUC": 0.005415722413937252,
+      "Mean Accuracy": 0.7286481876332622,
+      "Mean Precision": 0.7353686533477816,
+      "Mean Recall": 0.9417642466822794,
+      "Mean F1": 0.8257967604272676
+    },
+    {
+      "Model": "XGBoost",
+      "Mean AUC": 0.7055645476162535,
+      "Std AUC": 0.013917119908349162,
+      "Mean PR-AUC": 0.8129385340409595,
+      "Std PR-AUC": 0.0073713601442608025,
+      "Mean Accuracy": 0.7188404264392324,
+      "Mean Precision": 0.7219579840771161,
+      "Mean Recall": 0.9601873536299765,
+      "Mean F1": 0.823625026013049
+    },
+    {
+      "Model": "Random Forest",
+      "Mean AUC": 0.6953003732817298,
+      "Std AUC": 0.013923378914908482,
+      "Mean PR-AUC": 0.8058699457735251,
+      "Std PR-AUC": 0.0072854229864124775,
+      "Mean Accuracy": 0.7017813219616205,
+      "Mean Precision": 0.7676568267369624,
+      "Mean Recall": 0.8079625292740047,
+      "Mean F1": 0.7872664316397
+    },
+    {
+      "Model": "Logistic Regression",
+      "Mean AUC": 0.6431167859316824,
+      "Std AUC": 0.013781258999327257,
+      "Mean PR-AUC": 0.7711855567814034,
+      "Std PR-AUC": 0.013064640649712814,
+      "Mean Accuracy": 0.598784591329069,
+      "Mean Precision": 0.7657580412301174,
+      "Mean Recall": 0.5943793911007026,
+      "Mean F1": 0.6692399817455833
+    }
+  ],
+  "pairwise_comparisons": [
+    {
+      "Model 1": "Logistic Regression",
+      "Model 2": "Random Forest",
+      "Diff (AUC)": -0.052183587350047356,
+      "t-statistic": -7.69582609916907,
+      "p-value": 0.001533769035241288,
+      "Significance": "**"
+    },
+    {
+      "Model 1": "Logistic Regression",
+      "Model 2": "XGBoost",
+      "Diff (AUC)": -0.06244776168457111,
+      "t-statistic": -8.366929639820048,
+      "p-value": 0.001115887445882731,
+      "Significance": "**"
+    },
+    {
+      "Model 1": "Logistic Regression",
+      "Model 2": "CatBoost",
+      "Diff (AUC)": -0.0639652706034668,
+      "t-statistic": -7.502051802862579,
+      "p-value": 0.0016891249985524672,
+      "Significance": "**"
+    },
+    {
+      "Model 1": "Logistic Regression",
+      "Model 2": "LightGBM",
+      "Diff (AUC)": -0.06307281912599438,
+      "t-statistic": -8.08120757376527,
+      "p-value": 0.001273981536293077,
+      "Significance": "**"
+    },
+    {
+      "Model 1": "Random Forest",
+      "Model 2": "XGBoost",
+      "Diff (AUC)": -0.010264174334523757,
+      "t-statistic": -4.511944004863195,
+      "p-value": 0.010724108772782516,
+      "Significance": "*"
+    },
+    {
+      "Model 1": "Random Forest",
+      "Model 2": "CatBoost",
+      "Diff (AUC)": -0.01178168325341944,
+      "t-statistic": -5.1123564127043615,
+      "p-value": 0.0069228083984994235,
+      "Significance": "**"
+    },
+    {
+      "Model 1": "Random Forest",
+      "Model 2": "LightGBM",
+      "Diff (AUC)": -0.010889231775947028,
+      "t-statistic": -3.0520099880536162,
+      "p-value": 0.037953575758186864,
+      "Significance": "*"
+    },
+    {
+      "Model 1": "XGBoost",
+      "Model 2": "CatBoost",
+      "Diff (AUC)": -0.0015175089188956825,
+      "t-statistic": -0.8081355009366179,
+      "p-value": 0.4643317215485541,
+      "Significance": "ns"
+    },
+    {
+      "Model 1": "XGBoost",
+      "Model 2": "LightGBM",
+      "Diff (AUC)": -0.0006250574414232712,
+      "t-statistic": -0.3201059333977554,
+      "p-value": 0.7649114656118152,
+      "Significance": "ns"
+    },
+    {
+      "Model 1": "CatBoost",
+      "Model 2": "LightGBM",
+      "Diff (AUC)": 0.0008924514774724113,
+      "t-statistic": 0.3721555514015105,
+      "p-value": 0.7286546748001549,
+      "Significance": "ns"
+    }
+  ],
+  "best_model": {
+    "name": "CatBoost",
+    "auc": 0.7070820565351492,
+    "improvement_over_baseline_pct": 9.946136067775061
+  }
+}
