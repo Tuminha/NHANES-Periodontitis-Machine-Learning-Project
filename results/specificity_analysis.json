@@ -1,0 +1,20 @@
+{
+  "current_threshold": 0.49,
+  "sensitivity": 0.9729898516783763,
+  "specificity": 0.20443846671149965,
+  "precision": 0.7248197255175622,
+  "npv": 0.7784891165172856,
+  "accuracy": 0.7292888367629812,
+  "confusion_matrix": {
+    "tn": 608,
+    "fp": 2366,
+    "fn": 173,
+    "tp": 6232
+  },
+  "clinical_operating_point": {
+    "threshold": null,
+    "recall": null,
+    "specificity": null,
+    "f1": null
+  }
+}
