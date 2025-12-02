@@ -150,11 +150,19 @@ Two thresholds were pre-specified:
 
 External validation: We trained the primary model on NHANES 2011–2014, then evaluated the frozen model on NHANES 2009–2010. We applied the pre-specified operating thresholds selected on the training cross-validation curve (t=0.35 rule-out and t=0.65 balanced). We computed AUC and PR-AUC with stratified bootstrap 95% confidence intervals (1,000 resamples) and reported sensitivity, specificity, PPV, and NPV at both thresholds. We also generated a reliability diagram and decision curve analysis using a standard net benefit formulation.
 
-### 2.12 Software and Reproducibility
+### 2.12 Ethics Statement
+
+NHANES data are publicly available, de-identified secondary data; this work qualifies as non-human subjects research and did not require IRB approval.
+
+### 2.13 Software and Reproducibility
 
 - Python 3.11, scikit-learn 1.7, XGBoost 3.1, CatBoost 1.2, LightGBM 4.6
 - Code repository: https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project
 - Data: Public NHANES files (CDC website)
+
+### 2.14 Data and Code Availability
+
+Code is available at GitHub (https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project). Reproducible runs: `scripts/run_v13_primary.sh` (internal CV) and `scripts/run_external_validation.sh` (2009–2010 external evaluation). NHANES raw data are available from the CDC website; we include processing scripts to generate the analytic dataset.
 
 ---
 
@@ -173,6 +181,8 @@ External validation: We trained the primary model on NHANES 2011–2014, then ev
 | - Severe | 5,435 (57.9%) |
 | - Moderate | 475 (5.1%) |
 | - Mild | 495 (5.3%) |
+
+**Note on severity distribution:** Our severity breakdown differs from CDC population estimates (Eke et al. 2015: 8.9% severe, 30% moderate, 8.7% mild). This reflects (1) selection bias from NHANES full-mouth exam eligibility criteria, which preferentially include individuals with dental concerns, and (2) our binary outcome (any vs. no periodontitis) which does not depend on the mild/moderate/severe split. The prediction task remains valid as a screening tool.
 
 ### 3.2 Model Performance
 
@@ -329,16 +339,19 @@ These findings support the model's utility as a screening tool while acknowledgi
 
 5. **Missingness signals may partly reflect NHANES design;** portability to clinic-collected data must be tested.
 
-6. **US-only validation.** External validation on non-US cohorts (e.g., KNHANES) would strengthen generalizability claims.
+6. **US-only validation.** External validation on non-US cohorts (e.g., KNHANES) would strengthen generalizability claims. Next, we will harmonize KNHANES variables and report out-of-sample performance in a non-US cohort.
 
 7. **Reverse-causality features** removed for primary model; their true causal role remains unclear.
 
+8. **Severity distribution discrepancy.** Our sample shows higher severe:moderate ratios than CDC population estimates, likely due to selection bias in NHANES full-mouth exam eligibility. This does not affect our binary prediction task but warrants investigation.
+
 ### 4.8 Future Directions
 
-1. International replication (KNHANES, European surveys)
+1. **KNHANES validation:** Harmonize Korean National Health and Nutrition Examination Survey variables and evaluate model transportability to a non-US cohort
 2. Addition of inflammatory markers (CRP, IL-6) if available
 3. Prospective validation in clinical settings
 4. Health economic analysis of two-threshold screening strategy
+5. Investigation of severity distribution discrepancy with CDC estimates
 
 ---
 

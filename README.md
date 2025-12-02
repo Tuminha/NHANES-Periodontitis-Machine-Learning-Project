@@ -60,6 +60,8 @@ From **Polizzi et al. (2024)** systematic review:
 
 **Statistical testing:** Paired permutation tests on out-of-fold predictions (10,000 permutations).
 
+**Ethics:** NHANES data are publicly available, de-identified secondary data; this work qualifies as non-human subjects research and did not require IRB approval.
+
 ---
 
 ### 🏆 Model Selection
@@ -361,6 +363,16 @@ NHANES-Periodontitis-Machine-Learning-Project/
 - **STROBE:** Observational Studies
 - **Open Science:** All code public on GitHub
 
+### Data and Code Availability
+
+Code is available at [GitHub](https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project). 
+
+**Reproducible runs:**
+- `scripts/run_v13_primary.sh` - Internal CV (primary model)
+- `scripts/run_external_validation.sh` - External validation (NHANES 2009–2010)
+
+NHANES raw data are available from the CDC website; we include processing scripts to generate the analytic dataset.
+
 ---
 
 ## 📝 Citation
@@ -406,7 +418,9 @@ See [MODEL_CARD.md](MODEL_CARD.md) for detailed model documentation including:
 
 6. **Reverse-causality features** (dental_visit, floss_days) may encode treatment history rather than risk. Primary model excludes these.
 
-7. **US-only validation.** External validation on non-US cohorts (e.g., KNHANES) would strengthen generalizability claims.
+7. **US-only validation.** External validation on non-US cohorts (e.g., KNHANES) would strengthen generalizability claims. Next, we will harmonize KNHANES variables and report out-of-sample performance in a non-US cohort.
+
+8. **Severity distribution discrepancy.** Our sample shows higher severe:moderate ratios (58%:5%) than CDC population estimates (9%:30%). This reflects NHANES exam eligibility selection bias. Our binary prediction task (any vs. no periodontitis) is unaffected.
 
 ---
 
