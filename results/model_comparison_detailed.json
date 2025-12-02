@@ -2,47 +2,47 @@
   "summary": [
     {
       "Model": "CatBoost",
-      "Mean AUC": 0.7070820565351492,
-      "Std AUC": 0.014422001891573865,
-      "Mean PR-AUC": 0.8146435479998203,
-      "Std PR-AUC": 0.007607395969512256,
-      "Mean Accuracy": 0.7313138877043354,
-      "Mean Precision": 0.7320844084093749,
-      "Mean Recall": 0.9570647931303669,
-      "Mean F1": 0.8295313134392472
+      "Mean AUC": 0.7267310465611425,
+      "Std AUC": 0.01467463923301205,
+      "Mean PR-AUC": 0.829060863815417,
+      "Std PR-AUC": 0.0103048683309417,
+      "Mean Accuracy": 0.7368581663113006,
+      "Mean Precision": 0.7403868975375519,
+      "Mean Recall": 0.9469164715066354,
+      "Mean F1": 0.8309602009466737
     },
     {
       "Model": "LightGBM",
-      "Mean AUC": 0.7061896050576768,
-      "Std AUC": 0.012031111174934396,
-      "Mean PR-AUC": 0.8133446133551328,
-      "Std PR-AUC": 0.005415722413937252,
-      "Mean Accuracy": 0.7286481876332622,
-      "Mean Precision": 0.7353686533477816,
-      "Mean Recall": 0.9417642466822794,
-      "Mean F1": 0.8257967604272676
+      "Mean AUC": 0.724732303695889,
+      "Std AUC": 0.012481257626941482,
+      "Mean PR-AUC": 0.8256436092229811,
+      "Std PR-AUC": 0.007121123255863773,
+      "Mean Accuracy": 0.7316339445628998,
+      "Mean Precision": 0.7334859321188824,
+      "Mean Recall": 0.9536299765807963,
+      "Mean F1": 0.8291503804192117
     },
     {
       "Model": "XGBoost",
-      "Mean AUC": 0.7055645476162535,
-      "Std AUC": 0.013917119908349162,
-      "Mean PR-AUC": 0.8129385340409595,
-      "Std PR-AUC": 0.0073713601442608025,
-      "Mean Accuracy": 0.7188404264392324,
-      "Mean Precision": 0.7219579840771161,
-      "Mean Recall": 0.9601873536299765,
-      "Mean F1": 0.823625026013049
+      "Mean AUC": 0.7235413686366526,
+      "Std AUC": 0.012801125215905628,
+      "Mean PR-AUC": 0.8261514222210853,
+      "Std PR-AUC": 0.009259682123878864,
+      "Mean Accuracy": 0.7239576972281448,
+      "Mean Precision": 0.7143307763875761,
+      "Mean Recall": 0.9932864949258391,
+      "Mean F1": 0.8309411476688717
     },
     {
       "Model": "Random Forest",
-      "Mean AUC": 0.6953003732817298,
-      "Std AUC": 0.013923378914908482,
-      "Mean PR-AUC": 0.8058699457735251,
-      "Std PR-AUC": 0.0072854229864124775,
-      "Mean Accuracy": 0.7017813219616205,
-      "Mean Precision": 0.7676568267369624,
-      "Mean Recall": 0.8079625292740047,
-      "Mean F1": 0.7872664316397
+      "Mean AUC": 0.7166069872227746,
+      "Std AUC": 0.013237884482303048,
+      "Mean PR-AUC": 0.8203562131913322,
+      "Std PR-AUC": 0.009229083080916058,
+      "Mean Accuracy": 0.7099905046197584,
+      "Mean Precision": 0.7778569914384584,
+      "Mean Recall": 0.805464480874317,
+      "Mean F1": 0.7913906373580593
     },
     {
       "Model": "Logistic Regression",
@@ -60,87 +60,87 @@
     {
       "Model 1": "Logistic Regression",
       "Model 2": "Random Forest",
-      "Diff (AUC)": -0.052183587350047356,
-      "t-statistic": -7.69582609916907,
-      "p-value": 0.001533769035241288,
-      "Significance": "**"
+      "Diff (AUC)": -0.07349020129109218,
+      "t-statistic": -9.785509114768013,
+      "p-value": 0.0006111820441519094,
+      "Significance": "***"
     },
     {
       "Model 1": "Logistic Regression",
       "Model 2": "XGBoost",
-      "Diff (AUC)": -0.06244776168457111,
-      "t-statistic": -8.366929639820048,
-      "p-value": 0.001115887445882731,
-      "Significance": "**"
+      "Diff (AUC)": -0.08042458270497022,
+      "t-statistic": -11.005560766856624,
+      "p-value": 0.0003874083117046908,
+      "Significance": "***"
     },
     {
       "Model 1": "Logistic Regression",
       "Model 2": "CatBoost",
-      "Diff (AUC)": -0.0639652706034668,
-      "t-statistic": -7.502051802862579,
-      "p-value": 0.0016891249985524672,
-      "Significance": "**"
+      "Diff (AUC)": -0.08361426062946009,
+      "t-statistic": -10.62795082395168,
+      "p-value": 0.00044375735275598385,
+      "Significance": "***"
     },
     {
       "Model 1": "Logistic Regression",
       "Model 2": "LightGBM",
-      "Diff (AUC)": -0.06307281912599438,
-      "t-statistic": -8.08120757376527,
-      "p-value": 0.001273981536293077,
-      "Significance": "**"
+      "Diff (AUC)": -0.08161551776420661,
+      "t-statistic": -11.411331314549644,
+      "p-value": 0.00033642842211803204,
+      "Significance": "***"
     },
     {
       "Model 1": "Random Forest",
       "Model 2": "XGBoost",
-      "Diff (AUC)": -0.010264174334523757,
-      "t-statistic": -4.511944004863195,
-      "p-value": 0.010724108772782516,
+      "Diff (AUC)": -0.006934381413878032,
+      "t-statistic": -4.325267106930757,
+      "p-value": 0.012395834662309466,
       "Significance": "*"
     },
     {
       "Model 1": "Random Forest",
       "Model 2": "CatBoost",
-      "Diff (AUC)": -0.01178168325341944,
-      "t-statistic": -5.1123564127043615,
-      "p-value": 0.0069228083984994235,
-      "Significance": "**"
+      "Diff (AUC)": -0.010124059338367908,
+      "t-statistic": -9.964833850841766,
+      "p-value": 0.0005697203497963012,
+      "Significance": "***"
     },
     {
       "Model 1": "Random Forest",
       "Model 2": "LightGBM",
-      "Diff (AUC)": -0.010889231775947028,
-      "t-statistic": -3.0520099880536162,
-      "p-value": 0.037953575758186864,
-      "Significance": "*"
+      "Diff (AUC)": -0.00812531647311443,
+      "t-statistic": -8.862645143020615,
+      "p-value": 0.0008951740200934669,
+      "Significance": "***"
     },
     {
       "Model 1": "XGBoost",
       "Model 2": "CatBoost",
-      "Diff (AUC)": -0.0015175089188956825,
-      "t-statistic": -0.8081355009366179,
-      "p-value": 0.4643317215485541,
+      "Diff (AUC)": -0.0031896779244898754,
+      "t-statistic": -1.7822178135330582,
+      "p-value": 0.14929792827386404,
       "Significance": "ns"
     },
     {
       "Model 1": "XGBoost",
       "Model 2": "LightGBM",
-      "Diff (AUC)": -0.0006250574414232712,
-      "t-statistic": -0.3201059333977554,
-      "p-value": 0.7649114656118152,
+      "Diff (AUC)": -0.0011909350592363976,
+      "t-statistic": -1.569889482344269,
+      "p-value": 0.19152730176770896,
       "Significance": "ns"
     },
     {
       "Model 1": "CatBoost",
       "Model 2": "LightGBM",
-      "Diff (AUC)": 0.0008924514774724113,
-      "t-statistic": 0.3721555514015105,
-      "p-value": 0.7286546748001549,
+      "Diff (AUC)": 0.0019987428652534778,
+      "t-statistic": 1.4239035002757718,
+      "p-value": 0.22757738657000767,
       "Significance": "ns"
     }
   ],
   "best_model": {
     "name": "CatBoost",
-    "auc": 0.7070820565351492,
-    "improvement_over_baseline_pct": 9.946136067775061
+    "auc": 0.7267310465611425,
+    "improvement_over_baseline_pct": 13.00141163448692
   }
 }
