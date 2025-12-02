@@ -1,0 +1,52 @@
+{
+  "model": "LightGBM_v1.3_monotonic",
+  "n_samples": 9379,
+  "n_features": 33,
+  "top_10_features": [
+    {
+      "feature": "age",
+      "mean_abs_shap": 0.3185195974045061
+    },
+    {
+      "feature": "alcohol",
+      "mean_abs_shap": 0.2554450040004494
+    },
+    {
+      "feature": "height_cm",
+      "mean_abs_shap": 0.14800143393819168
+    },
+    {
+      "feature": "dental_visit",
+      "mean_abs_shap": 0.14748755500803817
+    },
+    {
+      "feature": "education",
+      "mean_abs_shap": 0.11887453217779864
+    },
+    {
+      "feature": "smoking",
+      "mean_abs_shap": 0.11271073472649758
+    },
+    {
+      "feature": "systolic_bp",
+      "mean_abs_shap": 0.08569929929007113
+    },
+    {
+      "feature": "hdl",
+      "mean_abs_shap": 0.06925773015232965
+    },
+    {
+      "feature": "floss_days",
+      "mean_abs_shap": 0.062162435754803326
+    },
+    {
+      "feature": "bmi",
+      "mean_abs_shap": 0.05943293643976315
+    }
+  ],
+  "reverse_causality_features": {
+    "dental_visit": 0.14748755500803817,
+    "floss_days": 0.062162435754803326,
+    "mobile_teeth": 0.01172740070368736
+  }
+}

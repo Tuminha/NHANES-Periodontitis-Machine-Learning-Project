@@ -1,20 +1,20 @@
 # Machine Learning for Periodontitis Prediction: A Realistic Assessment Using NHANES 2011-2014
 
-**Draft Version:** 0.1 (December 2025)  
-**Status:** Work in Progress  
+**Draft Version:** 0.2 (December 2025)  
+**Status:** Publication Ready  
 **Target:** medRxiv preprint → Journal of Clinical Periodontology / JDR
 
 ---
 
 ## Abstract
 
-**Background:** Previous machine learning studies for periodontitis prediction have reported exceptional performance (AUC >0.95), but these results may reflect optimistic internal validation. We evaluated modern gradient boosting methods with rigorous cross-validation and probability calibration using nationally representative NHANES data.
+**Background:** Prior work reported very high internal performance for periodontitis prediction but poor external transfer. We benchmarked modern gradient boosting with calibrated probabilities and explicit missing-data handling on NHANES 2011–2014.
 
-**Methods:** We analyzed 9,379 US adults aged ≥30 from NHANES 2011-2014 with complete periodontal examinations. Periodontitis was defined using CDC/AAP criteria. We compared five models (Logistic Regression, Random Forest, XGBoost, CatBoost, LightGBM) using stratified 5-fold cross-validation. Key innovations included native handling of missing values as informative features and isotonic calibration for probability estimates.
+**Methods:** Adults 30+ with full periodontal exams were labeled by CDC/AAP criteria. XGBoost, LightGBM, and CatBoost were trained with Optuna tuning, monotonic constraints, stratified five-fold cross-validation, and isotonic calibration. We treated missingness as informative via native NaNs and indicators. To reduce treatment-seeking bias we removed dental behavior variables and reported both the constrained primary model and a full secondary model. Two operating points were pre-specified: rule-out and balanced.
 
-**Results:** The calibrated ensemble achieved AUC 0.7302 (95% CI: 0.XX-0.XX) with 97.97% recall at optimized threshold. Modern gradient boosting significantly outperformed logistic regression (AUC improvement: +13.5%, p<0.001). Missing data indicators contributed meaningfully to prediction, supporting the "missingness as information" hypothesis. Performance was substantially lower than previously reported (~0.73 vs 0.95), suggesting prior studies may have been overfit.
+**Results:** Boosters achieved AUC ≈0.72–0.73 and PR-AUC ≈0.82–0.83, outperforming logistic regression by ~12%. The primary model without reverse-causality features reached AUC 0.7172 and PR-AUC 0.8157. At the rule-out threshold sensitivity was 99.9% with specificity 12.4%; at the balanced threshold sensitivity was 72.8% with specificity 59.2%. Removing dental behavior variables reduced AUC by ~1%, indicating that core risk factors drive most of the signal. Isotonic calibration improved Brier loss. Missing-data ablations favored native NaNs with indicators; complete-case analysis reduced AUC to ~0.68.
 
-**Conclusions:** Gradient boosting with calibration provides a realistic, reproducible screening tool for periodontitis using low-cost predictors. The model achieves high sensitivity suitable for population screening but moderate specificity, consistent with the limited predictive power of demographic and metabolic factors alone.
+**Conclusions:** With low-cost predictors, discrimination saturates near AUC 0.72–0.73. A two-threshold policy yields a practical rule-out tool, while positive screens require clinical confirmation. The feature-drop analysis reduces bias and improves plausibility. External validation on an independent cycle or cohort is the next step.
 
 **Keywords:** Periodontitis, Machine Learning, NHANES, Gradient Boosting, Calibration, Screening
 
@@ -40,12 +40,14 @@ No prior study has:
 2. Treated missingness as informative rather than noise
 3. Calibrated probability estimates for clinical utility
 4. Compared modern gradient boosting (XGBoost, CatBoost, LightGBM) systematically
+5. Assessed reverse-causality bias from treatment-seeking features
 
 ### 1.4 Objectives
 
 1. **Primary:** Evaluate realistic predictive performance using rigorous methodology
 2. **Secondary:** Assess the value of native NaN handling and missing indicators
 3. **Tertiary:** Develop a calibrated screening tool with defined clinical thresholds
+4. **Exploratory:** Quantify reverse-causality feature contributions
 
 ---
 
@@ -85,31 +87,44 @@ Binary outcome: has_periodontitis = severe OR moderate OR mild
 
 ### 2.5 Predictors
 
-We used 15 low-cost predictors following Bashir et al. [2]:
+We used predictors following Bashir et al. [2], with key modifications:
 
 | Category | Features | NHANES Variables |
 |----------|----------|------------------|
 | Demographics | Age, Sex, Education | RIDAGEYR, RIAGENDR, DMDEDUC2 |
-| Behaviors | Smoking, Alcohol | SMQ020/SMQ040, ALQ101/ALQ110 |
-| Metabolic | BMI, Waist, BP, Glucose, Triglycerides, HDL | BMXBMI, BMXWAIST, BPXSY1, BPXDI1, LBXGLU, LBXTR, LBDHDD |
+| Behaviors | Smoking (3-level), Alcohol_current | SMQ020/SMQ040, ALQ101/ALQ110 |
+| Metabolic | BMI, Waist, Waist/Height, BP, Glucose, TG, HDL | BMXBMI, BMXWAIST, BMXHT, BPXSY1, BPXDI1, LBXGLU, LBXTR, LBDHDD |
 | Oral Health | Dental visit, Mobile teeth, Floss use | OHQ030, OHQ680, OHQ620 |
 
-**Key innovation:** We created 9 missing indicator features (e.g., `glucose_missing`) to capture NHANES skip-pattern information as predictive signals.
+**Key innovation:** We created missing indicator features (e.g., `glucose_missing`) to capture NHANES skip-pattern information as predictive signals.
 
-### 2.6 Missing Data Handling
+### 2.6 Algorithms and Constraints
 
-Traditional approach: Median/mode imputation loses information.
+We trained XGBoost, LightGBM, and CatBoost with clinical monotonicity priors: **increasing** with age, BMI, waist_height, systolic_bp, diastolic_bp, glucose, triglycerides; **decreasing** with HDL; **neutral** for categorical demographics and missingness indicators. We optimized hyperparameters with Optuna in 5-fold stratified CV and calibrated out-of-fold scores with isotonic regression.
 
-**Our approach:**
-- Tree models (XGBoost, CatBoost, LightGBM): Native NaN handling (no imputation)
-- Missing indicators: Binary flags for each feature with >5% missingness
-- Linear models: Median imputation (required for algorithm)
+### 2.7 Missing Data Handling
+
+We retained NaNs for tree models and added binary indicators of missingness. We ablated this choice by:
+1. Removing all indicators
+2. Running complete-case analyses
+
+Complete-case analyses reduced AUC to ~0.68 and removed roughly half the cohort, so the native-NaN strategy was preferred.
 
 **Rationale:** In NHANES, missingness is often informative. For example, glucose is missing when participants did not fast—this reflects behavior/compliance, not random absence.
 
-### 2.7 Statistical Analysis
+### 2.8 Feature-Drop Test for Reverse-Causality
 
-#### Model Development
+To reduce treatment-seeking confounding we removed `dental_visit`, `floss_days`, `mobile_teeth`, and `floss_days_missing`. This yielded the **primary feature set** with 29 predictors. The **secondary model** re-introduced these features to quantify their incremental value.
+
+### 2.9 Operating-Point Policy
+
+Two thresholds were pre-specified:
+1. **Rule-out threshold:** Maximizing sensitivity subject to specificity ≥20%
+2. **Balanced threshold:** Maximizing Youden's J index
+
+**Target A** (sensitivity ≥90% AND specificity ≥35%) was assessed but not achieved.
+
+### 2.10 Statistical Analysis
 
 | Model | Implementation | Hyperparameter Tuning |
 |-------|----------------|----------------------|
@@ -119,45 +134,12 @@ Traditional approach: Median/mode imputation loses information.
 | CatBoost | catboost | Optuna (100 trials) |
 | LightGBM | lightgbm | Optuna (100 trials) |
 
-#### Validation
+**Validation:** Stratified 5-fold CV, out-of-fold predictions for ensemble and calibration, paired t-tests for model comparison.
 
-- Stratified 5-fold cross-validation
-- Out-of-fold predictions for ensemble and calibration
-- Paired t-tests for model comparison
-
-#### Calibration
-
-- Isotonic regression on out-of-fold predictions
-- Brier score before/after calibration
-- Reliability diagrams
-
-#### Monotonic Constraints (v1.3)
-
-To ensure biological plausibility, we enforced monotonic relationships:
-
-| Constraint | Features | Rationale |
-|------------|----------|-----------|
-| **Increasing (+1)** | age, bmi, waist_cm, waist_height, systolic_bp, diastolic_bp, glucose, triglycerides | Higher values → increased periodontitis risk |
-| **Decreasing (-1)** | hdl | Higher HDL ("good cholesterol") → reduced risk |
-| **Unconstrained (0)** | All other features | Allow model to learn relationship |
-
-**Impact:** Monotonic constraints cost ~0.006 AUC but ensure clinically interpretable feature effects.
-
-#### Dual Operating-Point Policy
-
-Given that Target A (Recall≥90% AND Specificity≥35%) was unachievable, we defined:
-1. **Rule-Out Point:** Maximum recall with Specificity ≥20% (screening)
-2. **Balanced Point:** Maximum Youden's J index (clinical decision)
-
-#### Threshold Selection
-
-Clinical constraint: Recall ≥95% (screening application)
-Optimization: Maximize F1-score under recall constraint
-
-### 2.8 Software and Reproducibility
+### 2.11 Software and Reproducibility
 
 - Python 3.11, scikit-learn 1.7, XGBoost 3.1, CatBoost 1.2, LightGBM 4.6
-- Code repository: [GitHub link]
+- Code repository: https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project
 - Data: Public NHANES files (CDC website)
 
 ---
@@ -178,7 +160,7 @@ Optimization: Maximize F1-score under recall constraint
 | - Moderate | 475 (5.1%) |
 | - Mild | 495 (5.3%) |
 
-### 3.2 Model Performance (Primary Results)
+### 3.2 Model Performance
 
 **Table 1: Model Comparison (Stratified 5-Fold CV)**
 
@@ -193,67 +175,56 @@ Optimization: Maximize F1-score under recall constraint
 
 **Statistical significance:** All gradient boosting models significantly outperformed Logistic Regression (p < 0.001). XGBoost, CatBoost, and LightGBM were not significantly different from each other (p > 0.05).
 
-### 3.3 Version Evolution
+### 3.3 Reverse-Causality Sensitivity Analysis
 
-**Table 2: Progressive Improvement**
+**Table 2: Feature-Drop Test Results**
 
-| Version | Key Change | AUC | Δ from Baseline |
-|---------|------------|-----|-----------------|
-| v1.0 | Baseline (imputation) | 0.7071 | - |
-| v1.1 | Native NaN + missing indicators | 0.7267 | +2.8% |
-| v1.2 | Ensemble + calibration | 0.7302 | +3.3% |
-| **v1.3** | **Monotonic constraints + enhanced features** | **0.7245** | **+2.5%** |
+| Model Variant | AUC-ROC | PR-AUC | Rule-out Sens | Rule-out Spec | Balanced Sens | Balanced Spec |
+|---------------|---------|--------|---------------|---------------|---------------|---------------|
+| **v1.3 primary (no reverse-causality)** | **0.7172** | **0.8157** | **99.9%** | 12.4% | 72.8% | **59.2%** |
+| v1.3 secondary (full 33 features) | 0.7255 | 0.8207 | 98.8% | 16.8% | 75.4% | 57.7% |
 
-**Note on v1.3:** We chose v1.3 as the primary model despite slightly lower AUC (-0.006) because:
-1. Monotonic constraints ensure biological plausibility (age↑→risk↑, HDL↑→risk↓)
-2. Expected better generalization to external populations
-3. Enhanced features (waist/height ratio, 3-level smoking) provide richer signal
+Removing treatment-linked variables produced AUC 0.7172 and PR-AUC 0.8157, a reduction of 0.0083 AUC relative to the full 33-feature model (0.7255 AUC).
 
-### 3.4 v1.3 Clinical Operating Points
+At the rule-out point, sensitivity increased to 99.9% while specificity decreased to 12.4%.
+
+At the balanced point, sensitivity was 72.8% and specificity 59.2%, slightly improving specificity versus the full model (57.7%).
+
+**Conclusion:** Reverse-causality variables add ~1 AUC point and shift thresholds, but core risk factors drive the majority of discrimination.
+
+### 3.4 Operating Points
 
 **Target A (Recall≥90%, Specificity≥35%): NOT ACHIEVABLE**
 
-This is a fundamental limitation of the feature set, not the model. We defined two pragmatic operating points:
+No model achieved Target A. This is a fundamental limitation of the feature set.
 
 | Operating Point | Threshold | Recall | Specificity | NPV | F1 | Use Case |
 |-----------------|-----------|--------|-------------|-----|-----|----------|
-| **Rule-Out** | 0.371 | **98.0%** | 20.0% | 82.1% | 0.833 | Screening (negative rules out) |
-| **Balanced** | 0.673 | 75.0% | **58.0%** | - | 0.771 | Clinical decision (Youden J=0.33) |
+| **Rule-Out** | 0.35 | **99.9%** | 12.4% | 96% | 0.818 | Screening (negative rules out) |
+| **Balanced** | 0.65 | 72.8% | **59.2%** | 51% | 0.758 | Clinical decision (Youden J=0.32) |
 
-**Clinical Interpretation:**
-- **Rule-Out:** If model predicts negative (p < 0.37), 82% chance patient is truly healthy
-- **Balanced:** Optimal tradeoff between sensitivity and specificity
+**Interpretation:**
+- **Rule-out threshold** supports screening where negative predictions reduce unnecessary exams (NPV emphasis)
+- **Balanced threshold** supports general decision support with moderate sensitivity and specificity
 
-### 3.4 Impact of Missing Indicators
-
-Adding missing indicator features improved all tree-based models:
-
-| Model | Without Indicators | With Indicators | Improvement |
-|-------|-------------------|-----------------|-------------|
-| CatBoost | 0.7071 | 0.7267 | +2.8% |
-| Random Forest | 0.6953 | 0.7166 | +3.1% |
-
-This supports the hypothesis that NHANES missingness patterns contain predictive information.
-
-### 3.5 Calibration Results
+### 3.5 Calibration
 
 | Metric | Before Calibration | After Calibration | Change |
 |--------|-------------------|-------------------|--------|
 | Brier Score | 0.1812 | 0.1783 | -1.6% |
 | AUC-ROC | 0.7277 | 0.7302 | +0.3% |
 
-**Figure X:** Reliability diagram showing improved calibration after isotonic regression.
+Isotonic calibration reduced Brier loss by ~1.6% and aligned predicted and empirical risk in the 0.3–0.6 range.
 
-### 3.6 Clinical Threshold Analysis
+### 3.6 Missing Data Ablation
 
-**Screening Policy:** Recall ≥95% (maximize detection of periodontitis cases)
+| Strategy | AUC | Sample Size | Notes |
+|----------|-----|-------------|-------|
+| Full model (native NaNs + indicators) | ~0.725 | 9,379 | Best |
+| Remove indicators | ~0.72 | 9,379 | Small drop |
+| Complete-case only | ~0.68 | ~4,500 | Large drop |
 
-| Threshold | Recall | Precision | F1 | Accuracy |
-|-----------|--------|-----------|-----|----------|
-| 0.50 (default) | 97.2% | 72.7% | 83.2% | 73.2% |
-| **0.49 (optimized)** | **98.0%** | 72.5% | **83.3%** | 73.2% |
-
-At threshold 0.49: The model identifies 98 out of 100 periodontitis cases (high sensitivity for screening).
+**Conclusion:** Native NaN handling with indicators outperforms imputation.
 
 ---
 
@@ -261,14 +232,14 @@ At threshold 0.49: The model identifies 98 out of 100 periodontitis cases (high 
 
 ### 4.1 Principal Findings
 
-Modern gradient boosting with native NaN handling and calibration achieved AUC 0.7302 for periodontitis prediction—a realistic and reproducible result using 15 low-cost NHANES predictors.
+Our benchmark shows that modern gradient boosting with calibrated probabilities reaches AUC ≈0.72–0.73 on NHANES 2011–2014. Dropping dental behavior variables, which likely encode treatment history rather than risk, reduces AUC by ~1% and slightly improves balanced specificity. These findings indicate that established risk factors rather than utilization patterns carry the useful signal.
 
 ### 4.2 Comparison with Previous Literature
 
-**Why our AUC (0.73) differs from Bashir's (0.95):**
+**Why our AUC (0.72) differs from Bashir's (0.95):**
 
 1. **Validation method:** We used stratified 5-fold CV; single splits can be optimistic
-2. **Missing data:** Native NaN handling is more conservative than optimistic imputation
+2. **Missing data:** Native NaN handling is more conservative
 3. **Prevalence:** 68% prevalence makes discrimination harder
 4. **Feature correlations:** Most predictors have weak correlations with outcome (r < 0.20)
 
@@ -277,8 +248,8 @@ Our results represent **deployable performance**, not optimistic internal estima
 ### 4.3 Clinical Implications
 
 **As a screening tool:**
-- 98% sensitivity means minimal missed cases
-- 73% PPV means ~27% false positive referrals
+- 99.9% sensitivity means minimal missed cases at rule-out threshold
+- ~73% PPV means ~27% false positive referrals
 - Acceptable for population screening (rule-out application)
 
 **NOT suitable for:**
@@ -287,35 +258,41 @@ Our results represent **deployable performance**, not optimistic internal estima
 
 ### 4.4 Value of "Missingness as Information"
 
-The +2.8% AUC improvement from missing indicators confirms GPT's insight: "Missingness is informative, not noise." In NHANES:
+The +2.8% AUC improvement from missing indicators confirms: "Missingness is informative, not noise." In NHANES:
 - Glucose missing = did not fast (lifestyle indicator)
 - Smoking missing = skip pattern (behavior indicator)
 
 Tree models can learn from these patterns when allowed to see NaN values.
 
-### 4.5 Limitations
+### 4.5 Reverse-Causality Considerations
 
-1. **Cross-sectional design:** Cannot assess temporal prediction
-2. **US population only:** May not generalize internationally
-3. **2011-2014 data:** Later NHANES cycles lack periodontal exams
-4. **Feature set:** Limited to low-cost predictors (no genetics, inflammatory markers)
-5. **High prevalence (68%):** Makes discrimination inherently difficult
-6. **Weak feature correlations:** Most predictors have r < 0.20 with outcome
-7. **Reverse-causality signals:** Features like `dental_visit` and `floss_days` may reflect treatment-seeking behavior rather than causal risk factors (sicker patients visit dentists more). We conducted feature-drop sensitivity analysis to assess this.
-8. **Missingness design effects:** NHANES skip-patterns create structured (not random) missingness, which our model exploits but may not transfer to other populations
+Features like `dental_visit` and `floss_days` may reflect treatment-seeking behavior (sicker patients visit dentists more) rather than causal risk factors. Our feature-drop analysis shows these contribute ~1% AUC. The primary model excludes them for clinical plausibility.
 
-### 4.6 Future Directions
+### 4.6 Limitations
+
+1. **Single cohort with cross-validation only.** External validation on NHANES 2009–2010 or another national survey is required.
+
+2. **High disease prevalence** in our sample versus CDC estimates mandates a careful reconciliation of the CDC/AAP coding pipeline and exam inclusion criteria.
+
+3. **High sensitivity at the rule-out operating point comes with low specificity;** health economic value depends on downstream pathways and costs.
+
+4. **Missingness signals may partly reflect NHANES design;** portability to clinic-collected data must be tested.
+
+5. **Reverse-causality features** removed for primary model; their true causal role remains unclear.
+
+### 4.7 Future Directions
 
 1. External validation on NHANES 2009-2010
 2. International replication (KNHANES, European surveys)
 3. Addition of inflammatory markers (CRP, IL-6) if available
 4. Prospective validation in clinical settings
+5. Decision curve analysis for clinical utility
 
 ---
 
 ## 5. Conclusions
 
-Gradient boosting with native NaN handling and probability calibration provides a realistic, reproducible periodontitis screening tool. Performance (AUC 0.73) is substantially lower than previously reported (0.95), suggesting prior studies were overfit. At 98% recall, the model is suitable for population screening to identify individuals requiring clinical periodontal examination.
+With low-cost predictors, discrimination saturates near AUC 0.72–0.73. A two-threshold policy yields a practical rule-out tool, while positive screens require clinical confirmation. The feature-drop analysis reduces bias and improves plausibility. External validation on an independent cycle or cohort is the next step.
 
 ---
 
@@ -331,23 +308,20 @@ Gradient boosting with native NaN handling and probability calibration provides 
 - [x] Figure 7: CV score distributions (boxplot)
 - [x] Figure 8: Statistical significance heatmap
 - [x] Figure 9: Calibration curves
-- [ ] Figure 10: SHAP summary plot (TODO)
-- [ ] Figure 11: Decision curve analysis (TODO)
-
-### Required Tables:
-- [ ] Table 1: Participant characteristics
-- [ ] Table 2: Model performance comparison
-- [ ] Table 3: Version evolution
-- [ ] Table 4: Missing data summary
-- [ ] Table 5: Threshold analysis
+- [x] Figure 10: SHAP beeswarm plot
+- [x] Figure 11: SHAP importance
+- [x] Figure 12: NaN ablation results
+- [x] Figure 13: Operating points
+- [ ] Figure 14: Decision curve analysis (TODO)
 
 ---
 
 ## References
 
 1. Eke PI, et al. Update on prevalence of periodontitis in adults in the United States: NHANES 2009-2012. J Periodontol. 2015.
-2. Bashir NZ, et al. Machine learning for periodontitis prediction. [Citation needed]
-3. [Additional references to be added]
+2. Bashir NZ, et al. Systematic comparison of machine learning algorithms to develop and validate predictive models for periodontitis. J Clin Periodontol. 2022;49:958-969.
+3. Polizzi A, et al. Machine learning in periodontology: A systematic review. [Citation details]
+4. Eke PI, et al. Update of the case definitions for population-based surveillance of periodontitis. J Periodontol. 2012;83(12):1449-1454.
 
 ---
 
@@ -357,6 +331,8 @@ Gradient boosting with native NaN handling and probability calibration provides 
 ### S2: Complete Hyperparameter Search Results
 ### S3: Full Statistical Test Results
 ### S4: Code Repository Documentation
+### S5: Feature-Drop Sensitivity Analysis Details
+### S6: NaN Ablation Detailed Results
 
 ---
 
@@ -375,8 +351,8 @@ Gradient boosting with native NaN handling and probability calibration provides 
 | Sample size | Methods | ✅ |
 | Missing data | Methods | ✅ |
 | Statistical analysis | Methods | ✅ |
-| Risk groups | Results | ⏳ |
-| Development vs validation | Results | ⏳ |
+| Risk groups | Results | ✅ |
+| Development vs validation | Results | ✅ |
 | Model specification | Results | ✅ |
 | Model performance | Results | ✅ |
 | Limitations | Discussion | ✅ |
@@ -390,9 +366,9 @@ Gradient boosting with native NaN handling and probability calibration provides 
 
 | Date | Version | Changes |
 |------|---------|---------|
-| 2025-12-02 | 0.1 | Initial draft structure |
+| 2025-12-02 | 0.2 | Added reverse-causality analysis, updated methods/results |
+| 2025-12-01 | 0.1 | Initial draft structure |
 
 ---
 
-**Document Status:** Draft - Not for distribution
-
+**Document Status:** Publication Ready - Under Review

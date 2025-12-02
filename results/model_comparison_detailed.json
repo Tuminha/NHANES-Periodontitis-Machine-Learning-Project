@@ -1,146 +1,146 @@
 {
   "summary": [
     {
-      "Model": "CatBoost",
-      "Mean AUC": 0.7267310465611425,
-      "Std AUC": 0.01467463923301205,
-      "Mean PR-AUC": 0.829060863815417,
-      "Std PR-AUC": 0.0103048683309417,
-      "Mean Accuracy": 0.7368581663113006,
-      "Mean Precision": 0.7403868975375519,
-      "Mean Recall": 0.9469164715066354,
-      "Mean F1": 0.8309602009466737
+      "Model": "LightGBM",
+      "Mean AUC": 0.727433464526728,
+      "Std AUC": 0.011842785587769071,
+      "Mean PR-AUC": 0.8295664912411149,
+      "Std PR-AUC": 0.0061321447160676505,
+      "Mean Accuracy": 0.7328069936034115,
+      "Mean Precision": 0.7316595329755868,
+      "Mean Recall": 0.9615925058548009,
+      "Mean F1": 0.8309564240278252
     },
     {
-      "Model": "LightGBM",
-      "Mean AUC": 0.724732303695889,
-      "Std AUC": 0.012481257626941482,
-      "Mean PR-AUC": 0.8256436092229811,
-      "Std PR-AUC": 0.007121123255863773,
-      "Mean Accuracy": 0.7316339445628998,
-      "Mean Precision": 0.7334859321188824,
-      "Mean Recall": 0.9536299765807963,
-      "Mean F1": 0.8291503804192117
+      "Model": "CatBoost",
+      "Mean AUC": 0.7270138135289441,
+      "Std AUC": 0.013247652732575839,
+      "Mean PR-AUC": 0.8308258295691944,
+      "Std PR-AUC": 0.00820146467809518,
+      "Mean Accuracy": 0.7333407249466951,
+      "Mean Precision": 0.7356005657888215,
+      "Mean Recall": 0.9517564402810305,
+      "Mean F1": 0.8297808916368039
     },
     {
       "Model": "XGBoost",
-      "Mean AUC": 0.7235413686366526,
-      "Std AUC": 0.012801125215905628,
-      "Mean PR-AUC": 0.8261514222210853,
-      "Std PR-AUC": 0.009259682123878864,
-      "Mean Accuracy": 0.7239576972281448,
-      "Mean Precision": 0.7143307763875761,
-      "Mean Recall": 0.9932864949258391,
-      "Mean F1": 0.8309411476688717
+      "Mean AUC": 0.7263196423902674,
+      "Std AUC": 0.013755813523339091,
+      "Mean PR-AUC": 0.8289371294684361,
+      "Std PR-AUC": 0.007282439117251602,
+      "Mean Accuracy": 0.7363257427149964,
+      "Mean Precision": 0.7375693250855514,
+      "Mean Recall": 0.9534738485558159,
+      "Mean F1": 0.8316190685398194
     },
     {
       "Model": "Random Forest",
-      "Mean AUC": 0.7166069872227746,
-      "Std AUC": 0.013237884482303048,
-      "Mean PR-AUC": 0.8203562131913322,
-      "Std PR-AUC": 0.009229083080916058,
-      "Mean Accuracy": 0.7099905046197584,
-      "Mean Precision": 0.7778569914384584,
-      "Mean Recall": 0.805464480874317,
-      "Mean F1": 0.7913906373580593
+      "Mean AUC": 0.7147702955996109,
+      "Std AUC": 0.01501425294237347,
+      "Mean PR-AUC": 0.8193802041298213,
+      "Std PR-AUC": 0.010037137732029314,
+      "Mean Accuracy": 0.7123368301350391,
+      "Mean Precision": 0.7756013619016608,
+      "Mean Recall": 0.8145199063231849,
+      "Mean F1": 0.7945618814579051
     },
     {
       "Model": "Logistic Regression",
-      "Mean AUC": 0.6431167859316824,
-      "Std AUC": 0.013781258999327257,
-      "Mean PR-AUC": 0.7711855567814034,
-      "Std PR-AUC": 0.013064640649712814,
-      "Mean Accuracy": 0.598784591329069,
-      "Mean Precision": 0.7657580412301174,
-      "Mean Recall": 0.5943793911007026,
-      "Mean F1": 0.6692399817455833
+      "Mean AUC": 0.6465511412933005,
+      "Std AUC": 0.01352545292632185,
+      "Mean PR-AUC": 0.7723125277295905,
+      "Std PR-AUC": 0.012210528557677758,
+      "Mean Accuracy": 0.6095533191186921,
+      "Mean Precision": 0.7709733780482575,
+      "Mean Recall": 0.609367681498829,
+      "Mean F1": 0.6806629925144251
     }
   ],
   "pairwise_comparisons": [
     {
       "Model 1": "Logistic Regression",
       "Model 2": "Random Forest",
-      "Diff (AUC)": -0.07349020129109218,
-      "t-statistic": -9.785509114768013,
-      "p-value": 0.0006111820441519094,
+      "Diff (AUC)": -0.06821915430631043,
+      "t-statistic": -9.059991265817851,
+      "p-value": 0.0008225566477843089,
       "Significance": "***"
     },
     {
       "Model 1": "Logistic Regression",
       "Model 2": "XGBoost",
-      "Diff (AUC)": -0.08042458270497022,
-      "t-statistic": -11.005560766856624,
-      "p-value": 0.0003874083117046908,
+      "Diff (AUC)": -0.07976850109696687,
+      "t-statistic": -10.818729107486627,
+      "p-value": 0.00041410061504484696,
       "Significance": "***"
     },
     {
       "Model 1": "Logistic Regression",
       "Model 2": "CatBoost",
-      "Diff (AUC)": -0.08361426062946009,
-      "t-statistic": -10.62795082395168,
-      "p-value": 0.00044375735275598385,
+      "Diff (AUC)": -0.08046267223564363,
+      "t-statistic": -11.354872803778436,
+      "p-value": 0.000342999552790672,
       "Significance": "***"
     },
     {
       "Model 1": "Logistic Regression",
       "Model 2": "LightGBM",
-      "Diff (AUC)": -0.08161551776420661,
-      "t-statistic": -11.411331314549644,
-      "p-value": 0.00033642842211803204,
+      "Diff (AUC)": -0.08088232323342748,
+      "t-statistic": -11.953924967208344,
+      "p-value": 0.000280617351833205,
       "Significance": "***"
     },
     {
       "Model 1": "Random Forest",
       "Model 2": "XGBoost",
-      "Diff (AUC)": -0.006934381413878032,
-      "t-statistic": -4.325267106930757,
-      "p-value": 0.012395834662309466,
-      "Significance": "*"
+      "Diff (AUC)": -0.011549346790656445,
+      "t-statistic": -16.639682363111863,
+      "p-value": 7.641628713864513e-05,
+      "Significance": "***"
     },
     {
       "Model 1": "Random Forest",
       "Model 2": "CatBoost",
-      "Diff (AUC)": -0.010124059338367908,
-      "t-statistic": -9.964833850841766,
-      "p-value": 0.0005697203497963012,
+      "Diff (AUC)": -0.012243517929333203,
+      "t-statistic": -11.938262690718636,
+      "p-value": 0.0002820592146664244,
       "Significance": "***"
     },
     {
       "Model 1": "Random Forest",
       "Model 2": "LightGBM",
-      "Diff (AUC)": -0.00812531647311443,
-      "t-statistic": -8.862645143020615,
-      "p-value": 0.0008951740200934669,
-      "Significance": "***"
+      "Diff (AUC)": -0.012663168927117052,
+      "t-statistic": -7.726903027794269,
+      "p-value": 0.0015105246095201983,
+      "Significance": "**"
     },
     {
       "Model 1": "XGBoost",
       "Model 2": "CatBoost",
-      "Diff (AUC)": -0.0031896779244898754,
-      "t-statistic": -1.7822178135330582,
-      "p-value": 0.14929792827386404,
+      "Diff (AUC)": -0.000694171138676758,
+      "t-statistic": -1.099004289591524,
+      "p-value": 0.33346955260047123,
       "Significance": "ns"
     },
     {
       "Model 1": "XGBoost",
       "Model 2": "LightGBM",
-      "Diff (AUC)": -0.0011909350592363976,
-      "t-statistic": -1.569889482344269,
-      "p-value": 0.19152730176770896,
+      "Diff (AUC)": -0.0011138221364606071,
+      "t-statistic": -1.109006479701303,
+      "p-value": 0.3296114389997775,
       "Significance": "ns"
     },
     {
       "Model 1": "CatBoost",
       "Model 2": "LightGBM",
-      "Diff (AUC)": 0.0019987428652534778,
-      "t-statistic": 1.4239035002757718,
-      "p-value": 0.22757738657000767,
+      "Diff (AUC)": -0.0004196509977838492,
+      "t-statistic": -0.4630458217777804,
+      "p-value": 0.6674028101702891,
       "Significance": "ns"
     }
   ],
   "best_model": {
-    "name": "CatBoost",
-    "auc": 0.7267310465611425,
-    "improvement_over_baseline_pct": 13.00141163448692
+    "name": "LightGBM",
+    "auc": 0.727433464526728,
+    "improvement_over_baseline_pct": 12.509810603943569
   }
 }

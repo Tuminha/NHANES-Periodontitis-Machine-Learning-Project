@@ -1,0 +1,34 @@
+{
+  "v1.3_full": {
+    "name": "v1.3_full",
+    "n_features": 33,
+    "auc": 0.7255326805774952,
+    "pr_auc": 0.8207039298134957,
+    "rule_out_recall": 0.9876658860265418,
+    "rule_out_specificity": 0.16778749159381304,
+    "balanced_recall": 0.7542544886807182,
+    "balanced_specificity": 0.5773369199731002
+  },
+  "v1.3_no_reverse_causality": {
+    "name": "v1.3_no_reverse_causality",
+    "n_features": 29,
+    "auc": 0.717245742046474,
+    "pr_auc": 0.8157447372867956,
+    "rule_out_recall": 0.9990632318501171,
+    "rule_out_specificity": 0.12441156691324814,
+    "balanced_recall": 0.7283372365339579,
+    "balanced_specificity": 0.5921318090114324
+  },
+  "dropped_features": [
+    "dental_visit",
+    "floss_days",
+    "mobile_teeth",
+    "floss_days_missing"
+  ],
+  "deltas": {
+    "auc": -0.008286938531021248,
+    "pr_auc": -0.004959192526700074,
+    "rule_out_recall": 0.011397345823575322,
+    "balanced_specificity": 0.014794889038332149
+  }
+}
