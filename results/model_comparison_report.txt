@@ -10,59 +10,59 @@ Primary Metric: AUC-ROC
 PERFORMANCE RANKING
 ================================================================================
 
-1. CatBoost
-   AUC:       0.7267 ± 0.0147
-   PR-AUC:    0.8291 ± 0.0103
-   Precision: 0.7404
-   Recall:    0.9469
+1. LightGBM
+   AUC:       0.7274 ± 0.0118
+   PR-AUC:    0.8296 ± 0.0061
+   Precision: 0.7317
+   Recall:    0.9616
    F1-Score:  0.8310
 
-2. LightGBM
-   AUC:       0.7247 ± 0.0125
-   PR-AUC:    0.8256 ± 0.0071
-   Precision: 0.7335
-   Recall:    0.9536
-   F1-Score:  0.8292
+2. CatBoost
+   AUC:       0.7270 ± 0.0132
+   PR-AUC:    0.8308 ± 0.0082
+   Precision: 0.7356
+   Recall:    0.9518
+   F1-Score:  0.8298
 
 3. XGBoost
-   AUC:       0.7235 ± 0.0128
-   PR-AUC:    0.8262 ± 0.0093
-   Precision: 0.7143
-   Recall:    0.9933
-   F1-Score:  0.8309
+   AUC:       0.7263 ± 0.0138
+   PR-AUC:    0.8289 ± 0.0073
+   Precision: 0.7376
+   Recall:    0.9535
+   F1-Score:  0.8316
 
 4. Random Forest
-   AUC:       0.7166 ± 0.0132
-   PR-AUC:    0.8204 ± 0.0092
-   Precision: 0.7779
-   Recall:    0.8055
-   F1-Score:  0.7914
+   AUC:       0.7148 ± 0.0150
+   PR-AUC:    0.8194 ± 0.0100
+   Precision: 0.7756
+   Recall:    0.8145
+   F1-Score:  0.7946
 
 5. Logistic Regression
-   AUC:       0.6431 ± 0.0138
-   PR-AUC:    0.7712 ± 0.0131
-   Precision: 0.7658
-   Recall:    0.5944
-   F1-Score:  0.6692
+   AUC:       0.6466 ± 0.0135
+   PR-AUC:    0.7723 ± 0.0122
+   Precision: 0.7710
+   Recall:    0.6094
+   F1-Score:  0.6807
 
 ================================================================================
 STATISTICAL SIGNIFICANCE (vs Best Model)
 ================================================================================
 
-🏆 CatBoost (Best)
-LightGBM: Δ = 0.0020, not significant
-XGBoost: Δ = 0.0032, not significant
-Random Forest: Δ = 0.0101, highly significant (p<0.001)
-Logistic Regression: Δ = 0.0836, highly significant (p<0.001)
+🏆 LightGBM (Best)
+CatBoost: Δ = 0.0004, not significant
+XGBoost: Δ = 0.0011, not significant
+Random Forest: Δ = 0.0127, significant (p<0.01)
+Logistic Regression: Δ = 0.0809, highly significant (p<0.001)
 
 ================================================================================
 INTERPRETATION
 ================================================================================
 
-Best Model: CatBoost
-Best AUC: 0.7267
-Baseline AUC (LogReg): 0.6431
-Improvement: +13.0% (+0.0836 points)
+Best Model: LightGBM
+Best AUC: 0.7274
+Baseline AUC (LogReg): 0.6466
+Improvement: +12.5% (+0.0809 points)
 
 ✅ Gradient boosting models outperform baseline models
 ✅ Modern ML methods show clear advantage for periodontitis prediction

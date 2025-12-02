@@ -1,0 +1,66 @@
+{
+  "model": "v1.3_secondary_full_features",
+  "description": "Secondary model - includes reverse-causality features for comparison",
+  "dataset": "NHANES 2011-2014",
+  "n_samples": 9379,
+  "n_features": 33,
+  "prevalence": 0.683,
+  "additional_features": [
+    "dental_visit",
+    "floss_days",
+    "mobile_teeth",
+    "floss_days_missing"
+  ],
+  "rationale": "Establishes upper bound and quantifies ~1% AUC contribution from reverse-causality variables",
+  "metrics": {
+    "auc_roc": 0.7255,
+    "pr_auc": 0.8207,
+    "brier_score": 0.1793
+  },
+  "operating_points": {
+    "rule_out": {
+      "name": "Rule-Out (High Sensitivity)",
+      "threshold": 0.37,
+      "recall": 0.9877,
+      "specificity": 0.168,
+      "precision": 0.706,
+      "npv": 0.83,
+      "f1": 0.824,
+      "use_case": "Initial screening. Negative result rules out disease."
+    },
+    "balanced": {
+      "name": "Balanced (Youden J)",
+      "threshold": 0.67,
+      "recall": 0.754,
+      "specificity": 0.577,
+      "precision": 0.79,
+      "npv": 0.52,
+      "f1": 0.772,
+      "youden_j": 0.331,
+      "use_case": "Clinical decision-making. Balanced tradeoff."
+    }
+  },
+  "confusion_matrix": {
+    "rule_out": {
+      "threshold": 0.37,
+      "tp": 6326,
+      "fp": 2475,
+      "tn": 499,
+      "fn": 79
+    },
+    "balanced": {
+      "threshold": 0.67,
+      "tp": 4832,
+      "fp": 1258,
+      "tn": 1716,
+      "fn": 1573
+    }
+  },
+  "calibration": "isotonic_regression",
+  "monotonic_constraints": {
+    "increasing": ["age", "bmi", "waist_cm", "waist_height", "systolic_bp", "diastolic_bp", "glucose", "triglycerides"],
+    "decreasing": ["hdl"]
+  },
+  "timestamp": "2025-12-02T00:00:00Z"
+}
+
