@@ -1,0 +1,31 @@
+{
+  "version": "v1.2-quick-wins",
+  "ensemble": {
+    "weights": {
+      "catboost": 0.34,
+      "xgboost": 0.33,
+      "lightgbm": 0.33
+    },
+    "auc": 0.7277006237246352,
+    "pr_auc": 0.8284883033423212,
+    "brier": 0.18120158862271307
+  },
+  "threshold_tuning": {
+    "target_recall": 0.95,
+    "optimal_threshold": 0.49,
+    "recall_at_threshold": 0.9797033567525371,
+    "precision_at_threshold": 0.724846944669054,
+    "f1_at_threshold": 0.8332226795910238
+  },
+  "calibration": {
+    "method": "isotonic",
+    "brier_before": 0.18120158862271307,
+    "brier_after": 0.17831213597445575,
+    "improvement_pct": 1.5946066865194908
+  },
+  "comparison_to_v11": {
+    "v11_best_auc": 0.7268158020040455,
+    "v12_ensemble_auc": 0.7277006237246352,
+    "improvement": 0.0008848217205896791
+  }
+}
