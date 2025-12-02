@@ -300,9 +300,23 @@ pytest tests/test_labels.py -v
 
 ---
 
-## 📈 Results (v1.1 - Native NaN Handling)
+## 📈 Results (v1.2 - Ensemble + Calibration)
 
-### 🆕 Experiment Success: +2.8% AUC Improvement!
+### 🆕 Latest: v1.2 Quick Wins - AUC 0.7302!
+
+**Changes in v1.2:**
+1. **Soft-voting ensemble:** CatBoost + XGBoost + LightGBM
+2. **Threshold tuning:** Optimized for recall ≥ 95%
+3. **Isotonic calibration:** Better probability estimates
+
+**Cumulative Results:**
+| Version | AUC | Δ from v1.0 | Key Change |
+|---------|-----|-------------|------------|
+| v1.0 | 0.7071 | - | Baseline (imputed) |
+| v1.1 | 0.7267 | +2.8% | Native NaN + missing indicators |
+| **v1.2** | **0.7302** | **+3.3%** | **Ensemble + calibration** |
+
+### v1.1 Improvement: Native NaN Handling
 
 **Key Insight (GPT):** *"Missingness is informative, not noise"*  
 **Change:** Added 9 missing indicator columns + native NaN handling for tree models  
@@ -325,14 +339,38 @@ pytest tests/test_labels.py -v
 
 ---
 
-### Version Comparison (v1.0 → v1.1)
+### Version Comparison (v1.0 → v1.1 → v1.2)
 
-| Model | v1.0 Baseline | v1.1 Native NaN | Improvement |
-|-------|---------------|-----------------|-------------|
-| **CatBoost** | 0.7071 | **0.7267** | **+0.0196** ✅ |
-| **LightGBM** | 0.7062 | **0.7247** | **+0.0185** ✅ |
-| **XGBoost** | 0.7056 | **0.7235** | **+0.0179** ✅ |
-| **Random Forest** | 0.6953 | **0.7166** | **+0.0213** ✅ |
+| Model | v1.0 Baseline | v1.1 Native NaN | v1.2 Ensemble |
+|-------|---------------|-----------------|---------------|
+| **CatBoost** | 0.7071 | 0.7267 | - |
+| **LightGBM** | 0.7062 | 0.7247 | - |
+| **XGBoost** | 0.7056 | 0.7235 | - |
+| **Ensemble** | - | - | **0.7277** |
+| **Calibrated** | - | - | **0.7302** ✅ |
+
+---
+
+### 🆕 v1.2 Quick Wins Results
+
+**1️⃣ Soft-Voting Ensemble:**
+- Combined: CatBoost (34%) + XGBoost (33%) + LightGBM (33%)
+- **Ensemble AUC: 0.7277** (+0.0009 from best single)
+
+**2️⃣ Threshold Tuning (Clinical Screening):**
+- Target: Recall ≥ 95%
+- **Achieved: 97.97% recall** ✅
+- Optimal threshold: 0.490
+- F1-Score: 0.8332
+
+**3️⃣ Isotonic Calibration:**
+- **Calibrated AUC: 0.7302** (+0.35% boost)
+- Brier Score: 0.1812 → 0.1783 (-1.6%)
+- Better probability estimates for risk stratification
+
+<div align="center">
+<img src="figures/12_calibration_analysis.png" alt="Calibration Analysis" width="800"/>
+</div>
 
 ---
 
