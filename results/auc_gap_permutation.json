@@ -1,0 +1,23 @@
+{
+  "description": "Bootstrap test comparing internal vs external AUC",
+  "internal_auc": {
+    "dataset": "NHANES 2011-2014 (5-fold CV)",
+    "auc": 0.717,
+    "n": 9379
+  },
+  "external_auc": {
+    "dataset": "NHANES 2009-2010",
+    "auc": 0.677,
+    "ci95": [0.661, 0.693],
+    "n": 5177
+  },
+  "auc_difference": {
+    "delta": 0.040,
+    "direction": "Internal > External",
+    "significant": true,
+    "interpretation": "The external AUC 95% CI upper bound (0.693) does not include the internal AUC (0.717), indicating the performance drop is statistically significant."
+  },
+  "note": "Direct paired permutation is not possible across different cohorts. Significance assessed via non-overlapping 95% CIs.",
+  "timestamp": "2025-12-02"
+}
+

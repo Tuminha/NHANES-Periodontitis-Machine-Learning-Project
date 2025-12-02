@@ -1,0 +1,10 @@
+{
+  "model": "v1.3_primary",
+  "dataset": "NHANES 2009-2010 (external)",
+  "description": "Decision curve analysis showing net benefit vs treat-all and treat-none",
+  "data_summary": {
+    "model_at_0.35": 0.5142793591702226,
+    "model_at_0.65": 0.21024310825353898
+  },
+  "timestamp": "2025-12-02T20:43:36.175449"
+}

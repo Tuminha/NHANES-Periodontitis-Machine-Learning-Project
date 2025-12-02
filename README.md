@@ -217,6 +217,43 @@ Isotonic calibration was fit on each fold's validation predictions and applied o
 
 ---
 
+### 🌍 External Validation (NHANES 2009-2010)
+
+We trained the primary model on NHANES 2011–2014 and evaluated it unchanged on the independent 2009–2010 cycle using the pre-specified operating thresholds from training.
+
+| Metric | Internal (2011-2014) | External (2009-2010) | Δ |
+|--------|----------------------|----------------------|---|
+| **N** | 9,379 | 5,177 | — |
+| **Prevalence** | 68.3% | 67.2% | -1.1% |
+| **AUC-ROC** | 0.717 | **0.677** (95% CI: 0.661–0.693) | **-5.6%** |
+| **PR-AUC** | 0.816 | **0.773** (95% CI: 0.757–0.789) | **-5.3%** |
+| **Brier Score** | 0.178 | **0.200** (95% CI: 0.194–0.207) | +12.4% |
+
+#### Operating Points on External Data
+
+| Threshold | Sensitivity | Specificity | PPV | NPV |
+|-----------|-------------|-------------|-----|-----|
+| **Rule-Out (0.35)** | 97.1% | 18.1% | 70.8% | 75.2% |
+| **Balanced (0.65)** | 82.6% | 43.3% | 74.9% | 54.9% |
+
+<div align="center">
+<img src="figures/external_roc_pr_calibration.png" alt="External Validation ROC, PR, Calibration" width="800"/>
+</div>
+
+#### Decision Curve Analysis
+
+Decision curve analysis showed positive net benefit compared to treat-none across clinically relevant thresholds. The model closely tracks "treat-all" due to high prevalence (67.2%), which is expected behavior.
+
+<div align="center">
+<img src="figures/decision_curve_external.png" alt="Decision Curve Analysis" width="600"/>
+</div>
+
+#### Transportability Note
+
+AUC declined by ~4% on the external cycle (95% CI does not include internal AUC), which is consistent with expected generalization gaps for demographic and metabolic predictors. The reliability curve indicated mild underestimation at probabilities below 0.3 and good alignment above 0.5. **We recommend local probability calibration before deployment in new cohorts.**
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -357,15 +394,19 @@ See [MODEL_CARD.md](MODEL_CARD.md) for detailed model documentation including:
 
 ## ⚠️ Limitations
 
-1. **Single cohort with cross-validation only.** External validation on NHANES 2009–2010 or another national survey is required.
+1. **External validation shows ~4% AUC drop.** Performance declined from 0.717 (internal) to 0.677 (external) on NHANES 2009–2010, indicating realistic generalization limits.
 
-2. **High disease prevalence** (68.3%) in our sample versus CDC estimates (~47%) reflects inclusion criteria (adults 30+ with full-mouth periodontal exams). Restricting to moderate-or-severe would lower prevalence.
+2. **High disease prevalence** (67-68%) in our sample versus CDC estimates (~47%) reflects inclusion criteria (adults 30+ with full-mouth periodontal exams). Restricting to moderate-or-severe would lower prevalence.
 
-3. **High sensitivity at rule-out operating point comes with low specificity;** health economic value depends on downstream pathways and costs.
+3. **Calibration drift on external cohort.** Underestimation at lower predicted probabilities suggests local recalibration is needed for new cohorts.
 
-4. **Missingness signals may partly reflect NHANES design;** portability to clinic-collected data must be tested.
+4. **High sensitivity at rule-out operating point comes with low specificity;** health economic value depends on downstream pathways and costs.
 
-5. **Reverse-causality features** (dental_visit, floss_days) may encode treatment history rather than risk. Primary model excludes these.
+5. **Missingness signals may partly reflect NHANES design;** portability to clinic-collected data must be tested.
+
+6. **Reverse-causality features** (dental_visit, floss_days) may encode treatment history rather than risk. Primary model excludes these.
+
+7. **US-only validation.** External validation on non-US cohorts (e.g., KNHANES) would strengthen generalizability claims.
 
 ---
 

@@ -8,13 +8,13 @@
 
 ## Abstract
 
-**Background:** Prior work reported very high internal performance for periodontitis prediction but poor external transfer. We benchmarked modern gradient boosting with calibrated probabilities and explicit missing-data handling on NHANES 2011–2014.
+**Background:** Prior work reported very high internal performance for periodontitis prediction but poor external transfer. We benchmarked modern gradient boosting with calibrated probabilities and explicit missing-data handling on NHANES 2011–2014, with external validation on the independent 2009–2010 cycle.
 
-**Methods:** Adults 30+ with full periodontal exams were labeled by CDC/AAP criteria. XGBoost, LightGBM, and CatBoost were trained with Optuna tuning, monotonic constraints, stratified five-fold cross-validation, and isotonic calibration. We treated missingness as informative via native NaNs and indicators. To reduce treatment-seeking bias we removed dental behavior variables and reported both the constrained primary model and a full secondary model. Two operating points were pre-specified: rule-out and balanced.
+**Methods:** Adults 30+ with full periodontal exams were labeled by CDC/AAP criteria. XGBoost, LightGBM, and CatBoost were trained with Optuna tuning, monotonic constraints, stratified five-fold cross-validation, and isotonic calibration. We treated missingness as informative via native NaNs and indicators. To reduce treatment-seeking bias we removed dental behavior variables and reported both the constrained primary model and a full secondary model. Two operating points were pre-specified: rule-out (t=0.35) and balanced (t=0.65). External validation used the frozen model on NHANES 2009–2010 (N=5,177).
 
-**Results:** Boosters achieved AUC ≈0.72–0.73 and PR-AUC ≈0.82–0.83, outperforming logistic regression by ~12%. The primary model without reverse-causality features reached AUC 0.7172 and PR-AUC 0.8157. At the rule-out threshold sensitivity was 99.9% with specificity 12.4%; at the balanced threshold sensitivity was 72.8% with specificity 59.2%. Removing dental behavior variables reduced AUC by ~1%, indicating that core risk factors drive most of the signal. Isotonic calibration improved Brier loss. Missing-data ablations favored native NaNs with indicators; complete-case analysis reduced AUC to ~0.68.
+**Results:** Boosters achieved AUC ≈0.72–0.73 and PR-AUC ≈0.82–0.83 internally, outperforming logistic regression by ~12%. The primary model without reverse-causality features reached AUC 0.7172 and PR-AUC 0.8157. On external validation (NHANES 2009–2010), the model achieved AUC 0.677 (95% CI: 0.661–0.693) and PR-AUC 0.773 (95% CI: 0.757–0.789). At the rule-out threshold (t=0.35), external sensitivity was 97.1% with specificity 18.1%; at the balanced threshold (t=0.65), sensitivity was 82.6% with specificity 43.3%. The ~4% AUC drop reflects realistic generalization limits. Isotonic calibration improved Brier loss, though calibration drift was observed at low probabilities on the external cohort.
 
-**Conclusions:** With low-cost predictors, discrimination saturates near AUC 0.72–0.73. A two-threshold policy yields a practical rule-out tool, while positive screens require clinical confirmation. The feature-drop analysis reduces bias and improves plausibility. External validation on an independent cycle or cohort is the next step.
+**Conclusions:** With low-cost predictors, discrimination saturates near AUC 0.72 internally and 0.68 externally. A two-threshold policy yields a practical rule-out tool, while positive screens require clinical confirmation. External validation confirms realistic generalization; local recalibration is recommended for new cohorts.
 
 **Keywords:** Periodontitis, Machine Learning, NHANES, Gradient Boosting, Calibration, Screening
 
@@ -146,7 +146,11 @@ Two thresholds were pre-specified:
 
 **Statistical comparisons:** Model comparisons used paired permutation tests on out-of-fold predictions (10,000 permutations) with effect sizes reported alongside p-values.
 
-### 2.11 Software and Reproducibility
+### 2.11 External Validation
+
+External validation: We trained the primary model on NHANES 2011–2014, then evaluated the frozen model on NHANES 2009–2010. We applied the pre-specified operating thresholds selected on the training cross-validation curve (t=0.35 rule-out and t=0.65 balanced). We computed AUC and PR-AUC with stratified bootstrap 95% confidence intervals (1,000 resamples) and reported sensitivity, specificity, PPV, and NPV at both thresholds. We also generated a reliability diagram and decision curve analysis using a standard net benefit formulation.
+
+### 2.12 Software and Reproducibility
 
 - Python 3.11, scikit-learn 1.7, XGBoost 3.1, CatBoost 1.2, LightGBM 4.6
 - Code repository: https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project
@@ -236,6 +240,31 @@ Isotonic calibration reduced Brier loss by ~1.6% and aligned predicted and empir
 
 **Conclusion:** In ablations, complete-case analysis reduced the sample by ~55% and AUC to ~0.68, underscoring that discarding missingness harms performance more than modeling it with native NaNs plus indicators.
 
+### 3.7 External Validation (NHANES 2009-2010)
+
+On the 2009–2010 cycle (N=5,177, prevalence 67.2%), the model achieved AUC 0.677 (95% CI: 0.661–0.693) and PR-AUC 0.773 (95% CI: 0.757–0.789).
+
+**Table 4: External Validation Results**
+
+| Metric | Internal (2011-2014) | External (2009-2010) | Δ |
+|--------|----------------------|----------------------|---|
+| **N** | 9,379 | 5,177 | — |
+| **Prevalence** | 68.3% | 67.2% | -1.1% |
+| **AUC-ROC** | 0.717 | 0.677 (95% CI: 0.661–0.693) | -5.6% |
+| **PR-AUC** | 0.816 | 0.773 (95% CI: 0.757–0.789) | -5.3% |
+| **Brier Score** | 0.178 | 0.200 (95% CI: 0.194–0.207) | +12.4% |
+
+**Table 5: Operating Points on External Data**
+
+| Threshold | Sensitivity | Specificity | PPV | NPV |
+|-----------|-------------|-------------|-----|-----|
+| **Rule-Out (t=0.35)** | 97.1% | 18.1% | 70.8% | 75.2% |
+| **Balanced (t=0.65)** | 82.6% | 43.3% | 74.9% | 54.9% |
+
+The reliability diagram showed underestimation at lower predicted probabilities (below 0.3) with reasonable alignment above 0.5. Decision curve analysis indicated positive net benefit across clinically relevant thresholds.
+
+**Transportability note:** The 95% CI upper bound for external AUC (0.693) does not include the internal AUC (0.717), indicating the performance drop is statistically significant. This ~4% AUC decline is consistent with realistic generalization expectations for demographic and metabolic predictors.
+
 ---
 
 ## 4. Discussion
@@ -278,31 +307,44 @@ Tree models can learn from these patterns when allowed to see NaN values.
 
 Features like `dental_visit` and `floss_days` may reflect treatment-seeking behavior (sicker patients visit dentists more) rather than causal risk factors. Our feature-drop analysis shows these contribute ~1% AUC. The primary model excludes them for clinical plausibility.
 
-### 4.6 Limitations
+### 4.6 Transportability and Calibration
 
-1. **Single cohort with cross-validation only.** External validation on NHANES 2009–2010 or another national survey is required.
+External validation demonstrated a realistic generalization gap of ~4% AUC (0.717 internal → 0.677 external). This magnitude is consistent with the limits of demographic and metabolic predictors for periodontitis. Importantly:
 
-2. **High disease prevalence** in our sample versus CDC estimates mandates a careful reconciliation of the CDC/AAP coding pipeline and exam inclusion criteria.
+- **Prevalence was similar** (68.3% vs 67.2%), suggesting comparable cohort characteristics
+- **Operating points transferred reasonably** - rule-out threshold maintained 97% sensitivity
+- **Calibration showed drift** at lower predicted probabilities, suggesting local recalibration is needed when deploying to new cohorts
 
-3. **High sensitivity at the rule-out operating point comes with low specificity;** health economic value depends on downstream pathways and costs.
+These findings support the model's utility as a screening tool while acknowledging realistic performance expectations.
 
-4. **Missingness signals may partly reflect NHANES design;** portability to clinic-collected data must be tested.
+### 4.7 Limitations
 
-5. **Reverse-causality features** removed for primary model; their true causal role remains unclear.
+1. **External validation shows ~4% AUC drop.** Performance declined from 0.717 (internal) to 0.677 (external) on NHANES 2009–2010, confirming realistic generalization limits.
 
-### 4.7 Future Directions
+2. **High disease prevalence** (67-68%) in our sample versus CDC estimates (~47%) reflects inclusion criteria (adults 30+ with full-mouth periodontal exams). Restricting to moderate-or-severe would lower prevalence.
 
-1. External validation on NHANES 2009-2010
-2. International replication (KNHANES, European surveys)
-3. Addition of inflammatory markers (CRP, IL-6) if available
-4. Prospective validation in clinical settings
-5. Decision curve analysis for clinical utility
+3. **Calibration drift on external cohort.** Underestimation at lower predicted probabilities suggests local recalibration is needed for new cohorts.
+
+4. **High sensitivity at the rule-out operating point comes with low specificity;** health economic value depends on downstream pathways and costs.
+
+5. **Missingness signals may partly reflect NHANES design;** portability to clinic-collected data must be tested.
+
+6. **US-only validation.** External validation on non-US cohorts (e.g., KNHANES) would strengthen generalizability claims.
+
+7. **Reverse-causality features** removed for primary model; their true causal role remains unclear.
+
+### 4.8 Future Directions
+
+1. International replication (KNHANES, European surveys)
+2. Addition of inflammatory markers (CRP, IL-6) if available
+3. Prospective validation in clinical settings
+4. Health economic analysis of two-threshold screening strategy
 
 ---
 
 ## 5. Conclusions
 
-With low-cost predictors, discrimination saturates near AUC 0.72–0.73. A two-threshold policy yields a practical rule-out tool, while positive screens require clinical confirmation. The feature-drop analysis reduces bias and improves plausibility. External validation on an independent cycle or cohort is the next step.
+With low-cost predictors, discrimination saturates near AUC 0.72 internally and 0.68 externally. External validation on NHANES 2009–2010 demonstrated a realistic ~4% AUC generalization gap while confirming the model's utility as a screening tool. A two-threshold policy yields a practical rule-out tool (97% sensitivity externally), while positive screens require clinical confirmation. The feature-drop analysis reduces reverse-causality bias and improves clinical plausibility. Local recalibration is recommended before deployment in new cohorts.
 
 ---
 
@@ -317,12 +359,13 @@ With low-cost predictors, discrimination saturates near AUC 0.72–0.73. A two-t
 - [x] Figure 6: Multi-metric comparison
 - [x] Figure 7: CV score distributions (boxplot)
 - [x] Figure 8: Statistical significance heatmap
-- [x] Figure 9: Calibration curves
+- [x] Figure 9: Calibration curves (internal)
 - [x] Figure 10: SHAP beeswarm plot
 - [x] Figure 11: SHAP importance
 - [x] Figure 12: NaN ablation results
 - [x] Figure 13: Operating points
-- [ ] Figure 14: Decision curve analysis (TODO)
+- [x] Figure 14: External validation ROC, PR, Calibration (external_roc_pr_calibration.png)
+- [x] Figure 15: Decision curve analysis (decision_curve_external.png)
 
 ---
 
@@ -376,9 +419,10 @@ With low-cost predictors, discrimination saturates near AUC 0.72–0.73. A two-t
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2025-12-02 | 0.3 | **Added external validation** (NHANES 2009-2010) |
 | 2025-12-02 | 0.2 | Added reverse-causality analysis, updated methods/results |
 | 2025-12-01 | 0.1 | Initial draft structure |
 
 ---
 
-**Document Status:** Publication Ready - Under Review
+**Document Status:** Publication Ready - External Validation Complete

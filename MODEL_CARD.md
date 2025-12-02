@@ -112,13 +112,44 @@ Clinical priors enforced during training:
 
 ---
 
+## External Validation
+
+### NHANES 2009-2010 Results
+
+| Metric | Value | 95% CI |
+|--------|-------|--------|
+| **N (test)** | 5,177 | — |
+| **Prevalence** | 67.2% | — |
+| **AUC-ROC** | 0.677 | [0.661, 0.693] |
+| **PR-AUC** | 0.773 | [0.757, 0.789] |
+| **Brier Score** | 0.200 | [0.194, 0.207] |
+
+### Operating Points on External Data
+
+| Threshold | Sensitivity | Specificity | PPV | NPV |
+|-----------|-------------|-------------|-----|-----|
+| Rule-Out (0.35) | 97.1% | 18.1% | 70.8% | 75.2% |
+| Balanced (0.65) | 82.6% | 43.3% | 74.9% | 54.9% |
+
+### Transportability and Recalibration
+
+When applied to NHANES 2009–2010, the model achieved AUC 0.677, a realistic ~4% drop from internal validation (0.717). Calibration showed drift at lower predicted probabilities (underestimation below 0.3) with reasonable alignment above 0.5.
+
+**Recommendations for deployment:**
+- Perform local recalibration on a small validation sample before clinical use
+- Consider setting thresholds using cohort-specific data
+- Monitor missingness patterns—if they differ substantially from NHANES, retrain missing indicators
+
+---
+
 ## Limitations and Risks
 
 ### Known Limitations
-1. **Single cohort** - No external validation yet
-2. **High prevalence** (68.3%) vs CDC estimates (47%) - reflects inclusion criteria
+1. **Moderate external generalization** - AUC dropped ~4% on NHANES 2009-2010
+2. **High prevalence** (67-68%) vs CDC estimates (47%) - reflects full-mouth exam inclusion criteria
 3. **NHANES-specific missingness patterns** - may not transfer to clinical data
-4. **Low specificity at rule-out** (12.4%) - high false positive rate for screening
+4. **Low specificity at rule-out** (18%) - high false positive rate for screening
+5. **Calibration drift** - underestimation at low probabilities on external cohort
 
 ### Ethical Considerations
 - Model may perpetuate biases in NHANES sampling

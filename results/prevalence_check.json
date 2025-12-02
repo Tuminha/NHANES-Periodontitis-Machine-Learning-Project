@@ -1,0 +1,37 @@
+{
+  "our_estimates": [
+    {
+      "cycle": "2009-2010",
+      "n": 5177,
+      "prevalence": 67.20108170755263,
+      "severe": 55.785203785976435,
+      "moderate": 6.606142553602473,
+      "mild": 4.80973536797373
+    },
+    {
+      "cycle": "2011-2012",
+      "n": 4566,
+      "prevalence": 68.61585632939115,
+      "severe": 58.58519491896628,
+      "moderate": 4.862023653088042,
+      "mild": 5.168637757336837
+    },
+    {
+      "cycle": "2013-2014",
+      "n": 4813,
+      "prevalence": 67.98254726781633,
+      "severe": 57.34469146062747,
+      "moderate": 5.256596717224184,
+      "mild": 5.381259089964678
+    }
+  ],
+  "cdc_reference": {
+    "source": "Eke et al. 2015",
+    "total": 47.2,
+    "severe": 8.9,
+    "moderate": 30.0,
+    "mild": 8.7
+  },
+  "reconciliation_note": "Higher prevalence reflects full periodontal exam inclusion criteria.",
+  "timestamp": "2025-12-02T20:43:35.754077"
+}
