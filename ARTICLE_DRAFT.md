@@ -131,6 +131,24 @@ Traditional approach: Median/mode imputation loses information.
 - Brier score before/after calibration
 - Reliability diagrams
 
+#### Monotonic Constraints (v1.3)
+
+To ensure biological plausibility, we enforced monotonic relationships:
+
+| Constraint | Features | Rationale |
+|------------|----------|-----------|
+| **Increasing (+1)** | age, bmi, waist_cm, waist_height, systolic_bp, diastolic_bp, glucose, triglycerides | Higher values → increased periodontitis risk |
+| **Decreasing (-1)** | hdl | Higher HDL ("good cholesterol") → reduced risk |
+| **Unconstrained (0)** | All other features | Allow model to learn relationship |
+
+**Impact:** Monotonic constraints cost ~0.006 AUC but ensure clinically interpretable feature effects.
+
+#### Dual Operating-Point Policy
+
+Given that Target A (Recall≥90% AND Specificity≥35%) was unachievable, we defined:
+1. **Rule-Out Point:** Maximum recall with Specificity ≥20% (screening)
+2. **Balanced Point:** Maximum Youden's J index (clinical decision)
+
 #### Threshold Selection
 
 Clinical constraint: Recall ≥95% (screening application)
@@ -184,7 +202,27 @@ Optimization: Maximize F1-score under recall constraint
 | v1.0 | Baseline (imputation) | 0.7071 | - |
 | v1.1 | Native NaN + missing indicators | 0.7267 | +2.8% |
 | v1.2 | Ensemble + calibration | 0.7302 | +3.3% |
-| v1.3 | Enhanced features (waist/height, 3-level smoking) | TBD | TBD |
+| **v1.3** | **Monotonic constraints + enhanced features** | **0.7245** | **+2.5%** |
+
+**Note on v1.3:** We chose v1.3 as the primary model despite slightly lower AUC (-0.006) because:
+1. Monotonic constraints ensure biological plausibility (age↑→risk↑, HDL↑→risk↓)
+2. Expected better generalization to external populations
+3. Enhanced features (waist/height ratio, 3-level smoking) provide richer signal
+
+### 3.4 v1.3 Clinical Operating Points
+
+**Target A (Recall≥90%, Specificity≥35%): NOT ACHIEVABLE**
+
+This is a fundamental limitation of the feature set, not the model. We defined two pragmatic operating points:
+
+| Operating Point | Threshold | Recall | Specificity | NPV | F1 | Use Case |
+|-----------------|-----------|--------|-------------|-----|-----|----------|
+| **Rule-Out** | 0.371 | **98.0%** | 20.0% | 82.1% | 0.833 | Screening (negative rules out) |
+| **Balanced** | 0.673 | 75.0% | **58.0%** | - | 0.771 | Clinical decision (Youden J=0.33) |
+
+**Clinical Interpretation:**
+- **Rule-Out:** If model predicts negative (p < 0.37), 82% chance patient is truly healthy
+- **Balanced:** Optimal tradeoff between sensitivity and specificity
 
 ### 3.4 Impact of Missing Indicators
 
@@ -261,6 +299,10 @@ Tree models can learn from these patterns when allowed to see NaN values.
 2. **US population only:** May not generalize internationally
 3. **2011-2014 data:** Later NHANES cycles lack periodontal exams
 4. **Feature set:** Limited to low-cost predictors (no genetics, inflammatory markers)
+5. **High prevalence (68%):** Makes discrimination inherently difficult
+6. **Weak feature correlations:** Most predictors have r < 0.20 with outcome
+7. **Reverse-causality signals:** Features like `dental_visit` and `floss_days` may reflect treatment-seeking behavior rather than causal risk factors (sicker patients visit dentists more). We conducted feature-drop sensitivity analysis to assess this.
+8. **Missingness design effects:** NHANES skip-patterns create structured (not random) missingness, which our model exploits but may not transfer to other populations
 
 ### 4.6 Future Directions
 
