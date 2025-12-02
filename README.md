@@ -374,6 +374,20 @@ pytest tests/test_labels.py -v
 
 ---
 
+### 🚧 v1.3-light: Enhanced Features (IN PROGRESS)
+
+**New Features Added:**
+- `waist_height`: Waist-to-height ratio (better adiposity index)
+- `smoke_current`, `smoke_former`: 3-level smoking (never/former/current)
+- `alcohol_current`: Current drinker from ALQ110
+- Kept `waist_cm`: Trees don't care about multicollinearity!
+
+**Expected Improvement:** +0.01-0.02 AUC
+
+**Status:** Feature engineering complete, awaiting re-training
+
+---
+
 ### Key Findings
 
 ✅ **GPT Insight Validated:**
