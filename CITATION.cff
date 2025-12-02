@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "NHANES Periodontitis Prediction: Modern Gradient Boosting Benchmark"
+version: 1.3.0
+date-released: 2025-12-02
+url: "https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project"
+repository-code: "https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project"
+license: MIT
+type: software
+authors:
+  - family-names: "Barbosa"
+    given-names: "Francisco Teixeira"
+    email: "cisco@periospot.com"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+    affiliation: "Periospot"
+keywords:
+  - periodontitis
+  - machine learning
+  - gradient boosting
+  - NHANES
+  - XGBoost
+  - CatBoost
+  - LightGBM
+  - clinical prediction
+  - oral health
+abstract: >-
+  Comprehensive benchmark of modern gradient boosting methods (XGBoost, 
+  CatBoost, LightGBM) for periodontitis prediction using NHANES 2011-2014.
+  Features explicit missing-data treatment, monotonic clinical constraints,
+  and isotonic calibration. Primary model achieves AUC 0.7172 with 29 
+  predictors, excluding reverse-causality features.
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Barbosa"
+      given-names: "Francisco Teixeira"
+      email: "cisco@periospot.com"
+  title: "Evaluating Modern Gradient Boosting Methods for Periodontitis Prediction: A Comprehensive Benchmark Using NHANES 2011-2014"
+  journal: "medRxiv"
+  year: 2025
+  doi: "10.1101/2025.XX.XX.XXXXXXX"
+

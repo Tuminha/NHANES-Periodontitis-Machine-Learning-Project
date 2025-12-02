@@ -6,7 +6,7 @@
 ![Status](https://img.shields.io/badge/Status-Publication%20Ready-brightgreen.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-**Systematic comparison of XGBoost, CatBoost, and LightGBM for periodontitis prediction using NHANES 2011-2014**
+**Comprehensive benchmark of XGBoost, CatBoost, and LightGBM with explicit missing-data treatment and monotonic clinical priors**
 
 [🎯 Overview](#-project-overview) • [📊 Results](#-results) • [🚀 Quick-Start](#-quick-start) • [📁 Structure](#-project-structure) • [📝 Citation](#-citation)
 
@@ -42,7 +42,7 @@ Periodontitis affects ~50% of US adults over 30, yet early prediction remains ch
 From **Polizzi et al. (2024)** systematic review:  
 > *"None of the included articles used more powerful networks [referring to modern gradient boosting methods]"*
 
-**This study fills that gap** by being the first to systematically compare XGBoost, CatBoost, and LightGBM for periodontitis prediction.
+**This study fills that gap** with a comprehensive benchmark of XGBoost, CatBoost, and LightGBM using explicit missing-data treatment and monotonic clinical priors.
 
 ---
 
@@ -50,22 +50,24 @@ From **Polizzi et al. (2024)** systematic review:
 
 **Models compared:** Logistic Regression, Random Forest, XGBoost, LightGBM, CatBoost.
 
-**Cohort:** NHANES 2011–2014, adults 30+, CDC/AAP case definition.
+**Cohort:** NHANES 2011–2014, adults 30+, CDC/AAP case definition (n=9,379).
 
 **Training:** Stratified 5-fold CV, Optuna-tuned, monotonic constraints consistent with clinical priors.
 
-**Calibration:** Isotonic on out-of-fold predictions.
+**Calibration:** Isotonic regression fit on each fold's validation predictions and applied only to that fold's predictions (no leakage).
 
 **Missing data:** Kept natively for boosters, plus missingness indicators.
+
+**Statistical testing:** Paired permutation tests on out-of-fold predictions (10,000 permutations).
 
 ---
 
 ### 🏆 Model Selection
 
-| Model | Description | Use Case |
-|-------|-------------|----------|
-| **Primary model** | v1.3-constrained without reverse-causality features (29 predictors) | Publication, clinical deployment |
-| **Secondary model** | v1.3-constrained with reverse-causality features (33 predictors) | Supplementary analysis |
+| Model | Features | AUC-ROC | PR-AUC | Use Case |
+|-------|----------|---------|--------|----------|
+| **Primary model** | 29 (no reverse-causality) | 0.7172 | 0.8157 | Publication, clinical deployment |
+| **Secondary model** | 33 (full features) | 0.7255 | 0.8207 | Supplementary analysis |
 
 ---
 
@@ -93,6 +95,24 @@ From **Polizzi et al. (2024)** systematic review:
 
 ---
 
+### 🔧 Monotonic Constraints
+
+Constraints were applied only to continuous clinical variables (not missingness indicators or socio-demographics):
+
+| Library | Parameter | Constraint Vector |
+|---------|-----------|-------------------|
+| XGBoost | `monotone_constraints` | tuple of +1, -1, 0 |
+| LightGBM | `monotone_constraints` | list of +1, -1, 0 |
+| CatBoost | `monotone_constraints` | list of +1, -1, 0 |
+
+| Constraint | Features | Rationale |
+|------------|----------|-----------|
+| **Increasing (+1)** | age, bmi, waist_cm, waist_height, systolic_bp, diastolic_bp, glucose, triglycerides | Higher values → increased periodontitis risk |
+| **Decreasing (-1)** | hdl | Higher HDL ("good cholesterol") → reduced risk |
+| **Unconstrained (0)** | All categorical, binary, and missingness indicators | Allow model to learn relationship |
+
+---
+
 ## 📊 Results
 
 ### Final Metrics
@@ -106,7 +126,7 @@ From **Polizzi et al. (2024)** systematic review:
 
 ---
 
-### 🎯 Clinical Operating Points
+### 🎯 Clinical Operating Points (Primary Model)
 
 **❌ Target A NOT Achievable:** Cannot achieve Recall ≥90% AND Specificity ≥35% simultaneously (fundamental feature set limitation)
 
@@ -127,13 +147,13 @@ From **Polizzi et al. (2024)** systematic review:
 
 ### 🔬 Missing Data Ablation (v1.3)
 
-| Strategy | AUC | Sample Size | Notes |
-|----------|-----|-------------|-------|
-| **Full model (native NaNs + indicators)** | **~0.725** | 9,379 | Best performance |
+| Strategy | AUC | Sample Size (N) | Notes |
+|----------|-----|-----------------|-------|
+| **Full model (native NaNs + indicators)** | **~0.725** | **9,379** | Best performance |
 | Remove indicators | ~0.72 | 9,379 | Small drop (~0.5-1% AUC) |
-| Complete-case only | ~0.68 | ~4,500 | Large drop, halves sample |
+| Complete-case only | ~0.68 | **~4,200** | Large drop, **halves sample** |
 
-**Conclusion:** Treat missingness as information rather than noise.
+**Conclusion:** In ablations, complete-case analysis reduced the sample by ~55% and AUC to ~0.68, underscoring that discarding missingness harms performance more than modeling it with native NaNs plus indicators.
 
 <div align="center">
 <img src="figures/18_nan_ablation.png" alt="NaN Ablation Results" width="800"/>
@@ -143,7 +163,12 @@ From **Polizzi et al. (2024)** systematic review:
 
 ### 📐 Calibration
 
-Isotonic calibration improved Brier by ~1.5–2% and corrected S-curve bias in mid-probability bins. Report calibrated probabilities everywhere.
+Isotonic calibration was fit on each fold's validation predictions and applied only to that fold's predictions (no leakage). This improved Brier by ~1.5–2% and corrected S-curve bias in mid-probability bins.
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Brier Score | 0.1812 | 0.1783 | -1.6% |
+| Calibration Slope | ~0.95 | ~1.00 | Improved |
 
 <div align="center">
 <img src="figures/12_calibration_analysis.png" alt="Calibration Analysis" width="800"/>
@@ -188,6 +213,8 @@ Isotonic calibration improved Brier by ~1.5–2% and corrected S-curve bias in m
 <img src="figures/11_model_comparison_significance.png" alt="Statistical Significance" width="800"/>
 </div>
 
+**Note:** Model comparisons used paired permutation tests on out-of-fold predictions (10,000 permutations).
+
 ---
 
 ## 🚀 Quick Start
@@ -220,10 +247,13 @@ python -c "import xgboost, catboost, lightgbm, optuna, shap; print('✅ All pack
 ### How to Reproduce v1.3 Primary Model
 
 ```bash
-# Run the master notebook
+# Option 1: Run the master notebook
 jupyter notebook notebooks/00_nhanes_periodontitis_end_to_end.ipynb
-
 # Execute all cells through Section 22
+
+# Option 2: Run the reproduction script (non-interactive)
+bash scripts/run_v13_primary.sh
+
 # Primary model results saved to: results/v13_primary_norc_summary.json
 ```
 
@@ -233,28 +263,25 @@ jupyter notebook notebooks/00_nhanes_periodontitis_end_to_end.ipynb
 
 ```
 NHANES-Periodontitis-Machine-Learning-Project/
-├── configs/
-│   └── config.yaml                 # Central configuration
-├── data/
-│   ├── raw/                        # Downloaded NHANES XPT files
-│   └── processed/                  # Cleaned, merged datasets
+├── configs/                        # Configuration files
+├── data/                           # Raw and processed data
 ├── figures/                        # All plots (ROC, SHAP, calibration)
 ├── models/                         # Trained models (.pkl)
 ├── results/                        # Metrics JSON/CSV
-│   ├── v13_primary_norc_summary.json   # Primary model
-│   ├── v13_secondary_full_summary.json # Secondary model
-│   ├── v13_operating_points.json       # Operating points
-│   ├── v13_featuredrop.json            # Feature-drop analysis
-│   └── v13_nan_ablation.json           # NaN ablation results
-├── src/
-│   ├── ps_plot.py                  # Periospot plotting style
-│   ├── labels.py                   # CDC/AAP case definitions
-│   ├── evaluation.py               # Metrics, ROC/PR, calibration
-│   └── utils.py                    # Reproducibility, I/O
-├── notebooks/
-│   └── 00_nhanes_periodontitis_end_to_end.ipynb
-├── ARTICLE_DRAFT.md                # Publication draft
-├── CHANGELOG.md                    # Version history
+│   ├── v13_primary_norc_summary.json
+│   ├── v13_secondary_full_summary.json
+│   ├── v13_operating_points.json
+│   └── ...
+├── src/                            # Source code
+├── notebooks/                      # Jupyter notebooks
+├── docs/                           # Documentation
+│   ├── publication/                # Article drafts
+│   ├── project/                    # Project docs
+│   ├── experiments/                # Experiment notes
+│   └── data_quality/               # Data fixes
+├── scripts/                        # Standalone scripts
+├── MODEL_CARD.md                   # Model documentation
+├── CITATION.cff                    # Citation file
 └── README.md
 ```
 
@@ -285,7 +312,7 @@ NHANES-Periodontitis-Machine-Learning-Project/
 ## 🔬 Publication Strategy
 
 ### Proposed Title
-**"Evaluating Modern Gradient Boosting Methods for Periodontitis Prediction: A Systematic Comparison Using NHANES 2011-2014"**
+**"Evaluating Modern Gradient Boosting Methods for Periodontitis Prediction: A Comprehensive Benchmark Using NHANES 2011-2014"**
 
 ### Target Journals
 1. **Journal of Clinical Periodontology** (IF 6.0) - Same venue as Bashir
@@ -301,18 +328,30 @@ NHANES-Periodontitis-Machine-Learning-Project/
 
 ## 📝 Citation
 
+See [CITATION.cff](CITATION.cff) for the preferred citation format.
+
 ### BibTeX
 
 ```bibtex
 @article{barbosa2025gradient,
-  title={Evaluating Modern Gradient Boosting Methods for Periodontitis Prediction: A Systematic Comparison Using NHANES 2011-2014},
+  title={Evaluating Modern Gradient Boosting Methods for Periodontitis Prediction: A Comprehensive Benchmark Using NHANES 2011-2014},
   author={Barbosa, Francisco Teixeira},
-  journal={In preparation},
+  journal={medRxiv preprint},
   year={2025},
-  note={First systematic evaluation of modern gradient boosting for periodontitis prediction},
+  doi={10.1101/2025.XX.XX.XXXXXXX},
   url={https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project}
 }
 ```
+
+---
+
+## 📄 Model Card
+
+See [MODEL_CARD.md](MODEL_CARD.md) for detailed model documentation including:
+- Intended use and contraindications
+- Operating thresholds and clinical deployment
+- Calibration notes
+- "Not diagnostic" disclaimer
 
 ---
 
@@ -320,7 +359,7 @@ NHANES-Periodontitis-Machine-Learning-Project/
 
 1. **Single cohort with cross-validation only.** External validation on NHANES 2009–2010 or another national survey is required.
 
-2. **High disease prevalence** in our sample versus CDC estimates mandates careful reconciliation of CDC/AAP coding pipeline and exam inclusion criteria.
+2. **High disease prevalence** (68.3%) in our sample versus CDC estimates (~47%) reflects inclusion criteria (adults 30+ with full-mouth periodontal exams). Restricting to moderate-or-severe would lower prevalence.
 
 3. **High sensitivity at rule-out operating point comes with low specificity;** health economic value depends on downstream pathways and costs.
 

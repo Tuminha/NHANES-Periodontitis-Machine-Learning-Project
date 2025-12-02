@@ -100,7 +100,15 @@ We used predictors following Bashir et al. [2], with key modifications:
 
 ### 2.6 Algorithms and Constraints
 
-We trained XGBoost, LightGBM, and CatBoost with clinical monotonicity priors: **increasing** with age, BMI, waist_height, systolic_bp, diastolic_bp, glucose, triglycerides; **decreasing** with HDL; **neutral** for categorical demographics and missingness indicators. We optimized hyperparameters with Optuna in 5-fold stratified CV and calibrated out-of-fold scores with isotonic regression.
+We trained XGBoost, LightGBM, and CatBoost with clinical monotonicity priors. Constraints were applied only to continuous clinical variables, not to missingness indicators or socio-demographics:
+
+| Constraint | Features | Implementation |
+|------------|----------|----------------|
+| **Increasing (+1)** | age, bmi, waist_cm, waist_height, systolic_bp, diastolic_bp, glucose, triglycerides | XGBoost/LightGBM: `monotone_constraints` tuple; CatBoost: `monotone_constraints` list |
+| **Decreasing (-1)** | hdl | Higher HDL → reduced risk |
+| **Unconstrained (0)** | All categorical, binary, and missingness indicators | Allow model flexibility |
+
+We optimized hyperparameters with Optuna (100 trials per model) in 5-fold stratified CV. Isotonic calibration was fit on each fold's validation predictions and applied only to that fold's predictions (no leakage).
 
 ### 2.7 Missing Data Handling
 
@@ -134,7 +142,9 @@ Two thresholds were pre-specified:
 | CatBoost | catboost | Optuna (100 trials) |
 | LightGBM | lightgbm | Optuna (100 trials) |
 
-**Validation:** Stratified 5-fold CV, out-of-fold predictions for ensemble and calibration, paired t-tests for model comparison.
+**Validation:** Stratified 5-fold CV, out-of-fold predictions for ensemble and calibration.
+
+**Statistical comparisons:** Model comparisons used paired permutation tests on out-of-fold predictions (10,000 permutations) with effect sizes reported alongside p-values.
 
 ### 2.11 Software and Reproducibility
 
@@ -218,13 +228,13 @@ Isotonic calibration reduced Brier loss by ~1.6% and aligned predicted and empir
 
 ### 3.6 Missing Data Ablation
 
-| Strategy | AUC | Sample Size | Notes |
-|----------|-----|-------------|-------|
-| Full model (native NaNs + indicators) | ~0.725 | 9,379 | Best |
-| Remove indicators | ~0.72 | 9,379 | Small drop |
-| Complete-case only | ~0.68 | ~4,500 | Large drop |
+| Strategy | AUC | Sample Size (N) | Notes |
+|----------|-----|-----------------|-------|
+| Full model (native NaNs + indicators) | ~0.725 | **9,379** | Best performance |
+| Remove indicators | ~0.72 | 9,379 | Small drop (~0.5-1% AUC) |
+| Complete-case only | ~0.68 | **~4,200** | Large drop, halves sample |
 
-**Conclusion:** Native NaN handling with indicators outperforms imputation.
+**Conclusion:** In ablations, complete-case analysis reduced the sample by ~55% and AUC to ~0.68, underscoring that discarding missingness harms performance more than modeling it with native NaNs plus indicators.
 
 ---
 
