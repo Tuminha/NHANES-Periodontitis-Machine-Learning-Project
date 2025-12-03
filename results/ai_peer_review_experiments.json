@@ -1,0 +1,76 @@
+{
+  "experiment_date": "2025-12-03T10:37:34.461065",
+  "purpose": "Testing Gemini AI critiques",
+  "exp1_monotonic": [
+    {
+      "model": "XGBoost",
+      "constrained": "Constrained",
+      "auc": 0.6860327364874974,
+      "prauc": 0.7918699279987813
+    },
+    {
+      "model": "XGBoost",
+      "constrained": "Unconstrained",
+      "auc": 0.6807511049443866,
+      "prauc": 0.7935980913687587
+    },
+    {
+      "model": "LightGBM",
+      "constrained": "Constrained",
+      "auc": 0.6897457118603226,
+      "prauc": 0.7952240300313806
+    },
+    {
+      "model": "LightGBM",
+      "constrained": "Unconstrained",
+      "auc": 0.6840024421908951,
+      "prauc": 0.7971016169256184
+    }
+  ],
+  "exp2_reverse_causality": [
+    {
+      "feature_set": "primary_v13",
+      "n_features": 27,
+      "auc": 0.6825496745932875
+    },
+    {
+      "feature_set": "full_features",
+      "n_features": 31,
+      "auc": 0.6919948163815782
+    }
+  ],
+  "exp3_missingness": [
+    {
+      "feature_set": "primary_v13",
+      "has_missingness": true,
+      "auc": 0.6825496745932875
+    },
+    {
+      "feature_set": "deployment_ready",
+      "has_missingness": false,
+      "auc": 0.6692481338396206
+    }
+  ],
+  "comprehensive": [
+    {
+      "feature_set": "Core only",
+      "n_features": 15,
+      "auc": 0.6692481338396206
+    },
+    {
+      "feature_set": "Core + missingness",
+      "n_features": 27,
+      "auc": 0.6825496745932875
+    },
+    {
+      "feature_set": "Core + reverse-causality",
+      "n_features": 19,
+      "auc": 0.6866414205445371
+    },
+    {
+      "feature_set": "ALL features (Gemini optimal)",
+      "n_features": 31,
+      "auc": 0.6919948163815782
+    }
+  ]
+}

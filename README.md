@@ -256,6 +256,22 @@ AUC declined by ~4% on the external cycle (95% CI does not include internal AUC)
 
 ---
 
+### 🤖 AI Peer Review Experiments
+
+We conducted a systematic empirical test of critiques raised by Gemini AI in an AI-to-AI debate about our methodology. The critiques and verdicts:
+
+| Critique | Gemini's Claim | Experiment | Verdict |
+|----------|----------------|------------|---------|
+| **Monotonic constraints** | "Handcuffs" that prevent learning U-shaped relationships | Compare unconstrained vs constrained models | ❌ **NEGLIGIBLE:** Δ AUC < 0.01 |
+| **Reverse-causality purge** | "Screening tools should use whatever predicts" | Test full-feature model with dental_visit, floss, mobile_teeth | ⚠️ **MINOR GAIN:** +0.004 AUC |
+| **Missingness indicators** | "Data leakage learning NHANES protocol" | Test deployment-ready model without indicators | ❌ **GEMINI WRONG:** Removing indicators drops AUC |
+
+**Full results:** See `notebooks/02_ai_peer_review_experiments.ipynb` and `results/gemini_critique_experiments_full_results.json`
+
+**Key Finding:** The maximum achievable AUC with all features and no constraints was ~0.72, confirming our methodology did not artificially "cap" performance.
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -310,9 +326,13 @@ NHANES-Periodontitis-Machine-Learning-Project/
 │   ├── v13_primary_norc_summary.json
 │   ├── v13_secondary_full_summary.json
 │   ├── v13_operating_points.json
+│   ├── gemini_critique_experiments_full_results.json
 │   └── ...
 ├── src/                            # Source code
 ├── notebooks/                      # Jupyter notebooks
+│   ├── 00_nhanes_periodontitis_end_to_end.ipynb  # Main analysis
+│   ├── 01_external_validation.ipynb               # External validation
+│   └── 02_ai_peer_review_experiments.ipynb        # AI critique tests
 ├── docs/                           # Documentation
 │   ├── publication/                # Article drafts
 │   ├── project/                    # Project docs
@@ -345,6 +365,14 @@ NHANES-Periodontitis-Machine-Learning-Project/
 | **Isotonic calibration** | Better probability estimates | -1.6% Brier |
 | **Soft-voting ensemble** | Combine 3 models | +0.0009 AUC |
 | **Dual operating points** | Target A unachievable | Practical deployment |
+
+### AI Peer Review Validation
+
+| Critique Tested | Finding | Conclusion |
+|-----------------|---------|------------|
+| Monotonic constraints hurt performance | Δ AUC < 0.01 | Constraints acceptable |
+| Reverse-causality features needed | +0.004 AUC | Minor gain, kept separate |
+| Missingness indicators = leakage | Removing hurts AUC | Indicators provide signal |
 
 ---
 

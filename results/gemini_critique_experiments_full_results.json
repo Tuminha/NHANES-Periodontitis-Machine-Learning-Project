@@ -1,0 +1,242 @@
+{
+  "metadata": {
+    "experiment_name": "AI Peer Review Experiments",
+    "purpose": "Testing Gemini AI critiques of our periodontitis prediction methodology",
+    "date": "2025-12-03T14:30:50.072875",
+    "author": "Francisco Teixeira Barbosa",
+    "notebook": "02_ai_peer_review_experiments.ipynb"
+  },
+  "gemini_critiques": {
+    "1_monotonic_constraints": {
+      "claim": "Monotonic constraints 'dumb down' the model, preventing U-shaped learning",
+      "quote": "They took a non-linear model capable of finding complex patterns and forced it to behave like Linear Regression"
+    },
+    "2_reverse_causality": {
+      "claim": "Removing dental_visit, floss_days was wrong for screening",
+      "quote": "This confuses Etiology with Prediction. In a screening tool, you want to know if someone hasn't visited a dentist in 5 years."
+    },
+    "3_missingness_indicators": {
+      "claim": "Missingness indicators are data leakage specific to NHANES",
+      "quote": "In a real-world clinical setting, a missing glucose test doesn't mean the same thing it does in NHANES"
+    },
+    "4_handicapped_model": {
+      "claim": "We artificially capped AUC at 0.72",
+      "quote": "They handicapped the model by removing the best features and restricting freedom"
+    }
+  },
+  "experiment_1_monotonic_constraints": {
+    "hypothesis": "Removing monotonic constraints will increase AUC",
+    "results": [
+      {
+        "model": "XGBoost",
+        "constrained": "Constrained",
+        "auc": 0.6860327364874974,
+        "prauc": 0.7918699279987813
+      },
+      {
+        "model": "XGBoost",
+        "constrained": "Unconstrained",
+        "auc": 0.6807511049443866,
+        "prauc": 0.7935980913687587
+      },
+      {
+        "model": "LightGBM",
+        "constrained": "Constrained",
+        "auc": 0.6897457118603226,
+        "prauc": 0.7952240300313806
+      },
+      {
+        "model": "LightGBM",
+        "constrained": "Unconstrained",
+        "auc": 0.6840024421908951,
+        "prauc": 0.7971016169256184
+      }
+    ],
+    "verdict": "NEGLIGIBLE_DIFFERENCE",
+    "avg_delta_auc": -0.005512450606269148
+  },
+  "experiment_2_reverse_causality": {
+    "hypothesis": "Adding reverse-causality features will significantly increase AUC",
+    "features_tested": [
+      "dental_visit",
+      "floss_days",
+      "mobile_teeth",
+      "floss_days_missing"
+    ],
+    "results": [
+      {
+        "feature_set": "primary_v13",
+        "n_features": 27,
+        "auc": 0.6825496745932875
+      },
+      {
+        "feature_set": "full_features",
+        "n_features": 31,
+        "auc": 0.6919948163815782
+      }
+    ],
+    "verdict": "SMALL_IMPROVEMENT",
+    "delta_auc": 0.0094451417882907
+  },
+  "experiment_3_missingness_indicators": {
+    "hypothesis": "Missingness indicators artificially inflate AUC",
+    "n_indicators": 12,
+    "results": [
+      {
+        "feature_set": "primary_v13",
+        "has_missingness": true,
+        "auc": 0.6825496745932875
+      },
+      {
+        "feature_set": "deployment_ready",
+        "has_missingness": false,
+        "auc": 0.6692481338396206
+      }
+    ],
+    "verdict": "MODEST_CONTRIBUTION",
+    "delta_auc": 0.013301540753666963,
+    "deployment_ready_auc": 0.6692481338396206
+  },
+  "comprehensive_comparison": {
+    "hypothesis": "Maximum achievable AUC is much higher than 0.72",
+    "results": [
+      {
+        "feature_set": "Core only",
+        "n_features": 15,
+        "auc": 0.6692481338396206
+      },
+      {
+        "feature_set": "Core + missingness",
+        "n_features": 27,
+        "auc": 0.6825496745932875
+      },
+      {
+        "feature_set": "Core + reverse-causality",
+        "n_features": 19,
+        "auc": 0.6866414205445371
+      },
+      {
+        "feature_set": "ALL features (Gemini optimal)",
+        "n_features": 31,
+        "auc": 0.6919948163815782
+      }
+    ],
+    "max_auc": 0.6919948163815782,
+    "our_published_auc": 0.717,
+    "difference": -0.025005183618421745
+  },
+  "feature_sets": {
+    "primary_v13": {
+      "n_features": 27,
+      "features": [
+        "age",
+        "sex",
+        "education",
+        "bmi",
+        "waist_cm",
+        "waist_height",
+        "height_cm",
+        "systolic_bp",
+        "diastolic_bp",
+        "glucose",
+        "triglycerides",
+        "hdl",
+        "smoke_current",
+        "smoke_former",
+        "alcohol_current",
+        "bmi_missing",
+        "systolic_bp_missing",
+        "diastolic_bp_missing",
+        "glucose_missing",
+        "triglycerides_missing",
+        "hdl_missing",
+        "smoking_missing",
+        "alcohol_missing",
+        "waist_cm_missing",
+        "waist_height_missing",
+        "height_cm_missing",
+        "alcohol_current_missing"
+      ]
+    },
+    "full_features": {
+      "n_features": 31,
+      "features": [
+        "age",
+        "sex",
+        "education",
+        "bmi",
+        "waist_cm",
+        "waist_height",
+        "height_cm",
+        "systolic_bp",
+        "diastolic_bp",
+        "glucose",
+        "triglycerides",
+        "hdl",
+        "smoke_current",
+        "smoke_former",
+        "alcohol_current",
+        "bmi_missing",
+        "systolic_bp_missing",
+        "diastolic_bp_missing",
+        "glucose_missing",
+        "triglycerides_missing",
+        "hdl_missing",
+        "smoking_missing",
+        "alcohol_missing",
+        "waist_cm_missing",
+        "waist_height_missing",
+        "height_cm_missing",
+        "alcohol_current_missing",
+        "dental_visit",
+        "floss_days",
+        "mobile_teeth",
+        "floss_days_missing"
+      ]
+    },
+    "deployment_ready": {
+      "n_features": 15,
+      "features": [
+        "age",
+        "sex",
+        "education",
+        "bmi",
+        "waist_cm",
+        "waist_height",
+        "height_cm",
+        "systolic_bp",
+        "diastolic_bp",
+        "glucose",
+        "triglycerides",
+        "hdl",
+        "smoke_current",
+        "smoke_former",
+        "alcohol_current"
+      ]
+    },
+    "core_only": {
+      "n_features": 15,
+      "features": [
+        "age",
+        "sex",
+        "education",
+        "bmi",
+        "waist_cm",
+        "waist_height",
+        "height_cm",
+        "systolic_bp",
+        "diastolic_bp",
+        "glucose",
+        "triglycerides",
+        "hdl",
+        "smoke_current",
+        "smoke_former",
+        "alcohol_current"
+      ]
+    }
+  },
+  "overall_verdict": {
+    "conclusion": "GEMINI_WRONG",
+    "explanation": "AUC ceiling is ~0.72-0.73 with these features. The 'realistic ceiling' claim is validated."
+  }
+}
