@@ -1,0 +1,26 @@
+{
+  "description": "Per-feature NaN rates: NHANES 2011-2014 (train) vs 2009-2010 (external)",
+  "feature_nan_rates": {
+    "age": {"train_2011_2014": 0.0, "external_2009_2010": 0.0, "delta": 0.0},
+    "sex": {"train_2011_2014": 0.0, "external_2009_2010": 0.0, "delta": 0.0},
+    "education": {"train_2011_2014": 0.0, "external_2009_2010": 0.0, "delta": 0.0},
+    "bmi": {"train_2011_2014": 6.1, "external_2009_2010": 5.8, "delta": -0.3},
+    "waist_cm": {"train_2011_2014": 10.9, "external_2009_2010": 11.2, "delta": 0.3},
+    "height_cm": {"train_2011_2014": 6.1, "external_2009_2010": 5.8, "delta": -0.3},
+    "systolic_bp": {"train_2011_2014": 12.5, "external_2009_2010": 13.1, "delta": 0.6},
+    "diastolic_bp": {"train_2011_2014": 12.5, "external_2009_2010": 13.1, "delta": 0.6},
+    "glucose": {"train_2011_2014": 55.2, "external_2009_2010": 54.8, "delta": -0.4},
+    "triglycerides": {"train_2011_2014": 55.8, "external_2009_2010": 55.1, "delta": -0.7},
+    "hdl": {"train_2011_2014": 11.7, "external_2009_2010": 12.0, "delta": 0.3},
+    "smoking": {"train_2011_2014": 54.8, "external_2009_2010": 53.9, "delta": -0.9},
+    "alcohol": {"train_2011_2014": 46.3, "external_2009_2010": 45.7, "delta": -0.6}
+  },
+  "flags": {
+    "delta_exceeds_10pct": [],
+    "max_delta_feature": "smoking",
+    "max_delta_value": 0.9
+  },
+  "interpretation": "No feature showed missingness shift exceeding 10 percentage points. Missingness patterns are comparable between training and external cohorts.",
+  "timestamp": "2025-12-02"
+}
+
