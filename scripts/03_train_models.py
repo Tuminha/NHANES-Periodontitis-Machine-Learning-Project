@@ -79,33 +79,28 @@ for d in [RESULTS_DIR, MODELS_DIR]:
 
 def load_and_split_data(target_col: str = 'periodontitis_binary'):
     """
-    Load processed data and create temporal train/val/test splits.
-    
+    Load processed data and create the repaired study split.
+
     Split strategy:
-    - Train: 2011-2012 + 2013-2014
-    - Validation: 2015-2016
-    - Test: 2017-2018
+    - Development: 2011-2012 + 2013-2014
+    - Same-source temporal validation: 2009-2010
     """
     df = pd.read_parquet(PROCESSED_DIR / "nhanes_combined.parquet")
     
     print(f"Loaded {len(df)} participants")
     print(f"Cycles: {df['cycle'].value_counts().to_dict()}")
     
-    # Define splits
-    train_cycles = ['2011-2012', '2013-2014']
-    val_cycles = ['2015-2016']
-    test_cycles = ['2017-2018']
-    
-    df_train = df[df['cycle'].isin(train_cycles)].copy()
-    df_val = df[df['cycle'].isin(val_cycles)].copy()
-    df_test = df[df['cycle'].isin(test_cycles)].copy()
-    
+    development_cycles = ['2011-2012', '2013-2014']
+    temporal_cycles = ['2009-2010']
+
+    df_development = df[df['cycle'].isin(development_cycles)].copy()
+    df_temporal = df[df['cycle'].isin(temporal_cycles)].copy()
+
     print(f"\nSplit sizes:")
-    print(f"  Train: {len(df_train)} ({df_train['cycle'].value_counts().to_dict()})")
-    print(f"  Val:   {len(df_val)} ({df_val['cycle'].value_counts().to_dict()})")
-    print(f"  Test:  {len(df_test)} ({df_test['cycle'].value_counts().to_dict()})")
-    
-    return df_train, df_val, df_test
+    print(f"  Development: {len(df_development)} ({df_development['cycle'].value_counts().to_dict()})")
+    print(f"  Temporal:    {len(df_temporal)} ({df_temporal['cycle'].value_counts().to_dict()})")
+
+    return df_development, df_temporal
 
 
 def prepare_features(df: pd.DataFrame, feature_cols: list, target_col: str):
@@ -445,14 +440,13 @@ def main():
         print("  Run 01_download_nhanes_data.py and 02_process_nhanes_data.py first.")
         return
     
-    # Load and split data
-    df_train, df_val, df_test = load_and_split_data()
+    # Load repaired study split.
+    df_development, df_temporal = load_and_split_data()
     
     # Prepare features
     # Note: You'll need to run create_bashir_predictors first
-    # X_train, y_train = prepare_features(df_train, FEATURE_COLS, TARGET_COL)
-    # X_val, y_val = prepare_features(df_val, FEATURE_COLS, TARGET_COL)
-    # X_test, y_test = prepare_features(df_test, FEATURE_COLS, TARGET_COL)
+    # X_development, y_development = prepare_features(df_development, FEATURE_COLS, TARGET_COL)
+    # X_temporal, y_temporal = prepare_features(df_temporal, FEATURE_COLS, TARGET_COL)
     
     # Impute missing values
     # imputer = SimpleImputer(strategy='median')

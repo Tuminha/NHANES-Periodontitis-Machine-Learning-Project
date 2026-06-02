@@ -1,217 +1,81 @@
-# Model Card: Periodontitis Risk Prediction (v1.3-primary)
+# Model Card: NHANES Periodontitis Benchmark v1.3
 
 ## Model Details
 
 | Field | Value |
-|-------|-------|
-| **Model Name** | v1.3-primary-norc |
-| **Version** | 1.3 |
-| **Type** | Soft-voting ensemble (CatBoost + XGBoost + LightGBM) |
-| **Task** | Binary classification (periodontitis vs. no periodontitis) |
-| **Training Data** | NHANES 2011-2014, adults ≥30 years (n=9,379) |
-| **Features** | 29 predictors (excludes reverse-causality features) |
-| **Calibration** | Isotonic regression |
-
----
+|---|---|
+| Model name | `v1.3_primary_no_reverse_causality` |
+| Model type | Calibrated soft-voting ensemble of CatBoost, XGBoost, and LightGBM |
+| Development data | NHANES 2011-2014 adults age 30+ with full periodontal examination, `n=9,379` |
+| Same-source temporal validation data | NHANES 2009-2010, `n=5,177` |
+| Outcome | Any CDC/AAP periodontitis versus no periodontitis |
+| Primary feature count | 29 predictors |
+| Secondary feature count | 33 predictors |
+| Calibration | Isotonic calibration in the cross-validation workflow |
 
 ## Intended Use
 
-### Primary Intended Use
-- **Population screening** to identify individuals who may benefit from clinical periodontal examination
-- **Risk stratification** in public health settings
-- **Research applications** comparing ML methods for periodontitis prediction
+This model is intended for research benchmarking, methods comparison, and risk-stratification experiments using NHANES-like tabular predictors. It is not a diagnostic system. It should not be used for treatment planning, insurance decisions, or patient-facing screening without independent validation, local recalibration, and governance review.
 
-### Out-of-Scope Uses
-- ❌ **NOT for clinical diagnosis** - requires professional examination
-- ❌ **NOT for treatment planning** - needs detailed clinical assessment
-- ❌ **NOT validated outside US adults 30+**
-- ❌ **NOT validated on clinic-collected data** (only NHANES survey data)
+## Performance
 
----
+| Evaluation | AUC-ROC | PR-AUC | Brier | Notes |
+|---|---:|---:|---:|---|
+| Internal 5-fold CV, primary 29-feature model | 0.7172 | 0.8157 | 0.1812 | Excludes treatment-seeking variables |
+| Internal 5-fold CV, secondary 33-feature model | 0.7255 | 0.8207 | 0.1793 | Includes treatment-seeking variables |
+| Same-source temporal validation, frozen primary model | 0.6771 | 0.7735 | 0.2003 | NHANES 2009-2010 |
 
-## Operating Thresholds
+Temporal operating points for the frozen primary model:
 
-### Rule-Out Threshold (Screening)
-| Metric | Value |
-|--------|-------|
-| **Threshold** | 0.35 |
-| **Sensitivity (Recall)** | 99.9% |
-| **Specificity** | 12.4% |
-| **NPV** | 96% |
-| **Use Case** | Initial screening; negative result rules out disease |
+| Threshold | Sensitivity | Specificity | PPV | NPV | Appropriate interpretation |
+|---:|---:|---:|---:|---:|---|
+| 0.35 | 97.1% | 18.1% | 70.8% | 75.2% | High-sensitivity triage threshold; many false positives and some false negatives remain |
+| 0.65 | 82.6% | 43.3% | 74.9% | 54.9% | More balanced threshold; still not sufficient for diagnosis |
 
-**Interpretation:** A predicted probability < 0.35 indicates low risk. With 96% NPV, a negative result provides strong evidence against periodontitis.
+## Feature Sets
 
-### Balanced Threshold (Clinical Decision)
-| Metric | Value |
-|--------|-------|
-| **Threshold** | 0.65 |
-| **Sensitivity (Recall)** | 72.8% |
-| **Specificity** | 59.2% |
-| **Youden's J** | 0.32 |
-| **Use Case** | Clinical decision support; balanced tradeoff |
+The primary model includes 29 predictors after removing treatment-seeking variables that may be consequences of existing disease.
 
-**Interpretation:** Optimal threshold for maximizing Youden's J index. Use when balanced sensitivity/specificity is desired.
+Included categories:
 
----
+- Demographics: age, sex, education.
+- Behaviors: smoking and alcohol variables retained as low-cost risk predictors.
+- Metabolic and anthropometric variables: BMI, height, waist measures, blood pressure, glucose, triglycerides, HDL.
+- Missingness indicators for variables where NHANES skip patterns or fasting subsamples create informative missingness.
 
-## Performance Metrics
+Excluded from the primary model:
 
-| Metric | Value |
-|--------|-------|
-| **AUC-ROC** | 0.7172 |
-| **PR-AUC** | 0.8157 |
-| **Brier Score** | 0.1783 (calibrated) |
-
-### Comparison with Secondary Model (full 33 features)
-| Model | AUC-ROC | PR-AUC |
-|-------|---------|--------|
-| Primary (29 features) | 0.7172 | 0.8157 |
-| Secondary (33 features) | 0.7255 | 0.8207 |
-
-The ~1% AUC difference reflects the exclusion of reverse-causality features (dental_visit, floss_days, mobile_teeth).
-
----
-
-## Features
-
-### Included (29 features)
-| Category | Features |
-|----------|----------|
-| **Demographics** | age, sex, education |
-| **Behaviors** | smoke_current, smoke_former, alcohol_current |
-| **Metabolic** | bmi, waist_cm, waist_height, height_cm, systolic_bp, diastolic_bp, glucose, triglycerides, hdl |
-| **Missingness Indicators** | bmi_missing, systolic_bp_missing, diastolic_bp_missing, glucose_missing, triglycerides_missing, hdl_missing, smoking_missing, alcohol_missing, waist_cm_missing, waist_height_missing, height_cm_missing, alcohol_current_missing |
-
-### Excluded (reverse-causality)
-- `dental_visit` - may reflect treatment-seeking behavior
-- `floss_days` - sicker patients may floss more
-- `mobile_teeth` - is a consequence, not predictor, of disease
+- `dental_visit`
+- `floss_days`
+- `mobile_teeth`
 - `floss_days_missing`
 
----
+The secondary 33-feature model restores these variables only to estimate the upper-bound performance contribution from treatment-seeking signals.
 
-## Monotonic Constraints
+## Validation and Applicability
 
-Clinical priors enforced during training:
+The temporal validation cohort is useful because the model is frozen and evaluated on a different NHANES cycle. It is still the same survey program, country, and broad measurement system. Geographic validation and prospective clinical validation remain unperformed.
 
-| Constraint | Features | Rationale |
-|------------|----------|-----------|
-| **Increasing (+1)** | age, bmi, waist_cm, waist_height, systolic_bp, diastolic_bp, glucose, triglycerides | Higher values → increased risk |
-| **Decreasing (-1)** | hdl | Higher HDL → reduced risk |
-| **Unconstrained (0)** | All others | Allow model flexibility |
+Known applicability limits:
 
----
-
-## Calibration Notes
-
-- **Method:** Isotonic regression
-- **Leakage Prevention:** Fit on each fold's validation predictions, applied only to that fold
-- **Brier Improvement:** -1.6%
-- **Reliability:** Predicted probabilities can be interpreted as approximate risk estimates
-
----
-
-## External Validation
-
-### NHANES 2009-2010 Results
-
-| Metric | Value | 95% CI |
-|--------|-------|--------|
-| **N (test)** | 5,177 | — |
-| **Prevalence** | 67.2% | — |
-| **AUC-ROC** | 0.677 | [0.661, 0.693] |
-| **PR-AUC** | 0.773 | [0.757, 0.789] |
-| **Brier Score** | 0.200 | [0.194, 0.207] |
-
-### Operating Points on External Data
-
-| Threshold | Sensitivity | Specificity | PPV | NPV |
-|-----------|-------------|-------------|-----|-----|
-| Rule-Out (0.35) | 97.1% | 18.1% | 70.8% | 75.2% |
-| Balanced (0.65) | 82.6% | 43.3% | 74.9% | 54.9% |
-
-### Transportability and Recalibration
-
-When applied to NHANES 2009–2010, the model achieved AUC 0.677, a realistic ~4% drop from internal validation (0.717). Calibration showed drift at lower predicted probabilities (underestimation below 0.3) with reasonable alignment above 0.5.
-
-**Recommendations for deployment:**
-- Perform local recalibration on a small validation sample before clinical use
-- Consider setting thresholds using cohort-specific data
-- Monitor missingness patterns—if they differ substantially from NHANES, retrain missing indicators
-
----
-
-## Limitations and Risks
-
-### Known Limitations
-1. **Moderate external generalization** - AUC dropped ~4% on NHANES 2009-2010
-2. **High prevalence** (67-68%) vs CDC estimates (47%) - reflects full-mouth exam inclusion criteria
-3. **NHANES-specific missingness patterns** - may not transfer to clinical data
-4. **Low specificity at rule-out** (18%) - high false positive rate for screening
-5. **Calibration drift** - underestimation at low probabilities on external cohort
-
-### Ethical Considerations
-- Model may perpetuate biases in NHANES sampling
-- Not validated across all demographic subgroups
-- Should not replace clinical judgment
-
-### Failure Modes
-- May underperform on populations with different risk factor distributions
-- Missingness indicators may not be informative in settings with complete data
-- Monotonic constraints may limit flexibility for non-linear relationships
-
----
-
-## Training Details
-
-| Parameter | Value |
-|-----------|-------|
-| **Validation** | Stratified 5-fold CV |
-| **Hyperparameter Tuning** | Optuna (100 trials per model) |
-| **Ensemble Weights** | CatBoost 34%, XGBoost 33%, LightGBM 33% |
-| **Random Seed** | 42 |
-
----
+- High analytic-sample prevalence, around 67-68%, limits direct PPV/NPV transfer to lower-prevalence populations.
+- Missingness indicators may learn survey logistics, so the deployment-ready no-indicator model should be reported as a conservative benchmark.
+- Subgroup calibration and discrimination should be regenerated before journal submission using `scripts/04_publication_analyses.py`.
+- Any implementation outside NHANES-like research data requires local recalibration and independent safety assessment.
 
 ## Reproducibility
 
 ```bash
-# Clone repository
-git clone https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project.git
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run reproduction script
-bash scripts/run_v13_primary.sh
-
-# Or run notebook interactively
-jupyter notebook notebooks/00_nhanes_periodontitis_end_to_end.ipynb
+make setup-lock
+source venv/bin/activate
+make test
+make consistency
+make reproduce
+make temporal
 ```
 
----
+The consistency check enforces agreement between result artifacts, README, this model card, and the manuscript source.
 
-## Citation
+## AI-Use Disclosure
 
-```bibtex
-@article{barbosa2025gradient,
-  title={Evaluating Modern Gradient Boosting Methods for Periodontitis Prediction},
-  author={Barbosa, Francisco Teixeira},
-  journal={medRxiv preprint},
-  year={2025}
-}
-```
-
----
-
-## Contact
-
-**Author:** Francisco Teixeira Barbosa  
-**Email:** cisco@periospot.com  
-**GitHub:** [@Tuminha](https://github.com/Tuminha)
-
----
-
-**⚠️ DISCLAIMER:** This model is for research and screening purposes only. It is NOT a diagnostic tool and should NOT be used for clinical decision-making without professional medical evaluation.
-
+AI systems were used as drafting and code-review aids during project development. The author remains responsible for study design, code, analysis decisions, interpretation, and manuscript claims.

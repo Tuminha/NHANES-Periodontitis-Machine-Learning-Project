@@ -1,0 +1,168 @@
+0001  # Machine Learning for Periodontitis Prediction: A Realistic Benchmark with Same-Source Temporal Validation on NHANES
+0002  
+0003  **Draft version:** publication-readiness repair, June 2026
+0004  **Article type:** prediction-model methodology benchmark
+0005  **Reporting target:** TRIPOD+AI-aligned development and validation report
+0006  
+0007  ## Abstract
+0008  
+0009  **Background:** Machine-learning studies for periodontitis prediction have reported very high internal discrimination using low-cost NHANES predictors. Such estimates require careful reassessment because internal validation, missing-data handling, calibration, and treatment-seeking predictors can materially change apparent performance.
+0010  
+0011  **Methods:** We analyzed NHANES 2011-2014 adults age 30 years or older with full periodontal examinations (`n=9,379`). Periodontitis was classified using CDC/AAP case definitions. XGBoost, LightGBM, and CatBoost were compared with logistic regression and random forest using stratified 5-fold cross-validation. The primary calibrated ensemble excluded treatment-seeking variables and used 29 predictors. A secondary 33-feature model restored dental visit, flossing, loose teeth, and floss-missing variables to estimate their incremental contribution. The frozen primary model was evaluated on NHANES 2009-2010 (`n=5,177`) as same-source temporal validation. Missingness ablations and deployment-ready feature analysis were used to assess whether NHANES missingness patterns contributed survey-specific signal.
+0012  
+0013  **Results:** The primary 29-feature model achieved internal AUC-ROC 0.7172 and PR-AUC 0.8157. The secondary 33-feature model achieved AUC-ROC 0.7255 and PR-AUC 0.8207, indicating that treatment-seeking variables added only 0.0083 AUC. In same-source temporal validation, the frozen primary model achieved AUC-ROC 0.6771, PR-AUC 0.7735, and Brier score 0.2003. At threshold 0.35, sensitivity was 97.1% and specificity was 18.1%; at threshold 0.65, sensitivity was 82.6% and specificity was 43.3%. These operating points are not diagnostic rules and require periodontal examination for confirmation.
+0014  
+0015  **Conclusions:** Low-cost NHANES predictors appear to support realistic discrimination around 0.72 internally and 0.68 under same-source temporal validation. The study is best interpreted as a benchmark and cautionary methods report, not as evidence that a deployable diagnostic screening model has been established. Geographic validation, prospective clinical validation, local recalibration, subgroup calibration, and survey-weighted sensitivity analyses remain necessary before implementation claims.
+0016  
+0017  **Keywords:** periodontitis; NHANES; prediction model; gradient boosting; calibration; missing data; TRIPOD+AI
+0018  
+0019  ## 1. Introduction
+0020  
+0021  Periodontitis is common among adults and is often identified only after irreversible tissue destruction has occurred. Low-cost risk stratification is attractive because full periodontal examination requires trained personnel, examination time, and access to dental care. However, a model built from demographic, behavioral, anthropometric, and metabolic predictors is not equivalent to clinical examination.
+0022  
+0023  Prior machine-learning work using NHANES has reported very high apparent discrimination. This manuscript reassesses the likely performance ceiling under stricter validation and reporting expectations. The central question is not whether a model can replace periodontal examination, but whether low-cost NHANES predictors contain enough signal to support reliable risk stratification and what methodological choices inflate or constrain that estimate.
+0024  
+0025  The objectives were to:
+0026  
+0027  1. Estimate realistic internal performance for modern gradient boosting models.
+0028  2. Evaluate performance on an earlier NHANES cycle using a frozen model.
+0029  3. Quantify the effect of treatment-seeking variables that may reflect existing disease.
+0030  4. Assess missingness indicators and a deployment-ready feature set without NHANES-specific missingness flags.
+0031  5. Reframe the model using prediction-model reporting standards and explicit limitations.
+0032  
+0033  ## 2. Methods
+0034  
+0035  ### 2.1 Study Design and Data Source
+0036  
+0037  This was a prediction-model benchmark using public NHANES data. The development cohort comprised NHANES 2011-2012 and 2013-2014. The same-source temporal validation cohort comprised NHANES 2009-2010. Later NHANES cycles were not used for temporal validation because full-mouth periodontal measurements required for CDC/AAP classification were discontinued.
+0038  
+0039  NHANES data are publicly available and de-identified. This secondary analysis did not require institutional review board approval.
+0040  
+0041  ### 2.2 Participants
+0042  
+0043  Eligible participants were adults age 30 years or older with full periodontal examination data and sufficient information for CDC/AAP periodontitis classification. The development cohort included 9,379 participants. The same-source temporal validation cohort included 5,177 participants.
+0044  
+0045  The analytic prevalence of periodontitis was approximately 67-68%, higher than general-population CDC estimates. This reflects the restricted full-examination analytic sample and should not be interpreted as the expected prevalence in a lower-risk screening population.
+0046  
+0047  ### 2.3 Outcome Definition
+0048  
+0049  The binary outcome was any periodontitis versus no periodontitis using CDC/AAP definitions. Severe, moderate, and mild classifications were assigned hierarchically from interproximal pocket depth and clinical attachment loss measurements, excluding third molars and enforcing different-teeth criteria where specified.
+0050  
+0051  The repository now includes synthetic tests for severe, moderate, mild, and no-periodontitis cases, third-molar exclusion, and different-teeth logic.
+0052  
+0053  ### 2.4 Predictors and Feature Sets
+0054  
+0055  The primary model used 29 predictors after excluding treatment-seeking variables that can be downstream of disease:
+0056  
+0057  - `dental_visit`
+0058  - `floss_days`
+0059  - `mobile_teeth`
+0060  - `floss_days_missing`
+0061  
+0062  The secondary model used 33 predictors by restoring those variables. The secondary model is reported only as an upper-bound sensitivity analysis, not as the preferred screening model.
+0063  
+0064  Predictor categories included demographics, smoking and alcohol variables, anthropometric measures, blood pressure, fasting glucose, triglycerides, HDL, and missingness indicators.
+0065  
+0066  ### 2.5 Missing Data
+0067  
+0068  NHANES missingness is not purely random. Fasting laboratory variables are collected in subsamples, and questionnaire items may follow skip-pattern logic. Tree models were allowed to handle missing values natively, and missingness indicators were included in the primary model. A deployment-ready 15-feature model without missingness indicators was retained as a conservative lower-bound benchmark because NHANES-specific missingness may not transfer to clinical datasets.
+0069  
+0070  ### 2.6 Model Development and Calibration
+0071  
+0072  Gradient boosting models were tuned using Optuna and evaluated with stratified 5-fold cross-validation. Monotonic constraints were applied to selected continuous variables where clinical priors were clear. Isotonic calibration was used for probability calibration in the cross-validation workflow.
+0073  
+0074  The final temporal evaluation used the frozen primary model and pre-specified thresholds from the development workflow. Thresholds were not re-optimized on the temporal validation cohort.
+0075  
+0076  ### 2.7 Statistical Analysis
+0077  
+0078  Discrimination was summarized with AUC-ROC and PR-AUC. Calibration was summarized with Brier score and reliability plots. Operating points were reported using sensitivity, specificity, PPV, and NPV. Decision-curve analysis was included as a descriptive utility analysis only.
+0079  
+0080  Survey-weighted prevalence and subgroup performance are generated by `scripts/04_publication_analyses.py` when processed prediction tables are available. These analyses should be regenerated immediately before journal submission.
+0081  
+0082  ## 3. Results
+0083  
+0084  ### 3.1 Cohorts
+0085  
+0086  The development cohort included 9,379 adults from NHANES 2011-2014. The temporal validation cohort included 5,177 adults from NHANES 2009-2010. Periodontitis prevalence was 68.3% in development data and 67.2% in temporal validation data.
+0087  
+0088  ### 3.2 Internal Model Performance
+0089  
+0090  | Model variant | Features | AUC-ROC | PR-AUC | Interpretation |
+0091  |---|---:|---:|---:|---|
+0092  | Primary model without treatment-seeking variables | 29 | 0.7172 | 0.8157 | Preferred benchmark model |
+0093  | Secondary full-feature model | 33 | 0.7255 | 0.8207 | Upper-bound sensitivity analysis |
+0094  | Deployment-ready core model | 15 | 0.6692 | 0.8137 | Conservative feature set without missingness indicators |
+0095  
+0096  The full-feature model improved AUC by 0.0083 over the primary model. This small difference supports excluding treatment-seeking variables from the primary benchmark.
+0097  
+0098  ### 3.3 Same-Source Temporal Validation
+0099  
+0100  | Metric | Development estimate | Temporal validation estimate |
+0101  |---|---:|---:|
+0102  | N | 9,379 | 5,177 |
+0103  | Prevalence | 68.3% | 67.2% |
+0104  | AUC-ROC | 0.7172 | 0.6771 (95% CI 0.6612-0.6934) |
+0105  | PR-AUC | 0.8157 | 0.7735 (95% CI 0.7571-0.7892) |
+0106  | Brier score | 0.1812 | 0.2003 (95% CI 0.1935-0.2073) |
+0107  
+0108  The drop from internal AUC 0.7172 to temporal AUC 0.6771 is consistent with a modest but meaningful generalization gap.
+0109  
+0110  ### 3.4 Operating Points
+0111  
+0112  | Threshold | Sensitivity | Specificity | PPV | NPV |
+0113  |---:|---:|---:|---:|---:|
+0114  | 0.35 | 97.1% | 18.1% | 70.8% | 75.2% |
+0115  | 0.65 | 82.6% | 43.3% | 74.9% | 54.9% |
+0116  
+0117  The 0.35 threshold prioritizes sensitivity but has very low specificity and an NPV of only 75.2% in this high-prevalence cohort. It should be described as a high-sensitivity triage operating point, not a reliable disease-exclusion rule.
+0118  
+0119  ### 3.5 Missingness and Survey-Design Sensitivity
+0120  
+0121  Missingness indicators contributed limited but measurable predictive signal. Missingness patterns were broadly comparable between the development and temporal validation cohorts, but the signal may still be NHANES-specific. The deployment-ready 15-feature model remains the most conservative estimate for settings where NHANES missingness patterns are unavailable.
+0122  
+0123  Survey-weighted prevalence and subgroup-performance tables should be generated from processed prediction data before submission. The repository now includes reusable code for these analyses, but the current manuscript should not claim population-level transportability until those tables are complete and reviewed.
+0124  
+0125  ## 4. Discussion
+0126  
+0127  This repair changes the interpretation of the study. The main contribution is not a clinically ready model. The contribution is a reproducible benchmark showing that realistic performance for low-cost periodontitis predictors is far below highly optimistic internal estimates reported in some prior work.
+0128  
+0129  The same-source temporal validation result is important but limited. Because both cohorts come from NHANES, performance does not establish geographic transportability, prospective clinical performance, or behavior in lower-prevalence screening populations.
+0130  
+0131  The operating points also require conservative interpretation. High sensitivity at threshold 0.35 comes at the cost of low specificity, and the NPV does not support reassuring individual patients without periodontal examination.
+0132  
+0133  ## 5. Limitations
+0134  
+0135  1. The validation cohort is temporally distinct but not independent by geography, health system, or measurement program.
+0136  2. The analytic cohort is restricted to adults with full periodontal examination data and has high disease prevalence.
+0137  3. NHANES missingness indicators may encode survey logistics rather than transportable clinical information.
+0138  4. Survey-weighted and subgroup calibration tables must be regenerated before submission and interpreted carefully.
+0139  5. The model predicts current case status, not future incident periodontitis.
+0140  6. The manuscript does not establish patient benefit, treatment impact, or workflow safety.
+0141  
+0142  ## 6. Conclusions
+0143  
+0144  The primary 29-feature model achieved AUC-ROC 0.7172 internally and 0.6771 under same-source temporal validation. A secondary 33-feature model provided only a small apparent gain, supporting exclusion of treatment-seeking variables from the preferred benchmark. These results support a cautious methodological conclusion: low-cost NHANES predictors provide moderate discrimination and are useful for benchmarking, but they do not establish a clinically ready periodontitis screening system.
+0145  
+0146  ## Data and Code Availability
+0147  
+0148  Code and saved result artifacts are available at: <https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project>. Raw NHANES data are available from the CDC.
+0149  
+0150  ## Funding
+0151  
+0152  No external funding was reported for this analysis.
+0153  
+0154  ## Conflicts of Interest
+0155  
+0156  The author declares no conflicts of interest.
+0157  
+0158  ## AI-Use Disclosure
+0159  
+0160  AI systems were used for drafting support, code review, and critique generation during manuscript development. The author reviewed and remains responsible for all analysis decisions, code changes, interpretation, and final claims.
+0161  
+0162  ## References
+0163  
+0164  1. Eke PI, Page RC, Wei L, Thornton-Evans G, Genco RJ. Update of the case definitions for population-based surveillance of periodontitis. J Periodontol. 2012;83(12):1449-1454.
+0165  2. Eke PI, Dye BA, Wei L, et al. Update on prevalence of periodontitis in adults in the United States: NHANES 2009-2012. J Periodontol. 2015;86(5):611-622.
+0166  3. Bashir NZ, Rahman Z, Chen SLS. Systematic comparison of machine learning algorithms to develop and validate predictive models for periodontitis. J Clin Periodontol. 2022;49:958-969.
+0167  4. Collins GS, Moons KGM, Dhiman P, et al. TRIPOD+AI statement: updated guidance for reporting clinical prediction models that use regression or machine learning methods. BMJ. 2024;385:e078378.
+0168  5. Moons KGM, Damen JAA, Kaul T, et al. PROBAST+AI: an updated quality, risk of bias, and applicability assessment tool for prediction models using regression or artificial intelligence methods. BMJ. 2025;388:e082505.

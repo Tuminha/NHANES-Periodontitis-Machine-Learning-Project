@@ -1,5 +1,6 @@
 {
   "dataset": "NHANES 2009-2010",
+  "validation_design": "same-source temporal validation",
   "model": "v1.3_primary_ensemble_calibrated",
   "n_train": 9379,
   "n_test": 5177,

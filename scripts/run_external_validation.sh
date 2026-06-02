@@ -1,9 +1,9 @@
 #!/bin/bash
 # ==============================================================================
-# External Validation Script for NHANES 2009-2010
+# Same-source temporal validation script for NHANES 2009-2010
 # ==============================================================================
 # 
-# This script runs the external validation notebook non-interactively,
+# This script runs the temporal validation notebook non-interactively,
 # generating all figures and result files.
 #
 # Usage:
@@ -21,23 +21,23 @@
 set -e  # Exit on error
 
 echo "=============================================="
-echo "🔬 NHANES External Validation (2009-2010)"
+echo "NHANES Same-Source Temporal Validation (2009-2010)"
 echo "=============================================="
 
 # Navigate to project root
 cd "$(dirname "$0")/.."
 PROJECT_ROOT=$(pwd)
 
-echo "📁 Project root: $PROJECT_ROOT"
+echo "Project root: $PROJECT_ROOT"
 
 # Check if notebook exists
 NOTEBOOK="$PROJECT_ROOT/notebooks/01_external_validation.ipynb"
 if [ ! -f "$NOTEBOOK" ]; then
-    echo "❌ Error: Notebook not found at $NOTEBOOK"
+    echo "Error: Notebook not found at $NOTEBOOK"
     exit 1
 fi
 
-echo "📓 Running notebook: $NOTEBOOK"
+echo "Running notebook: $NOTEBOOK"
 
 # Execute notebook
 jupyter nbconvert --to notebook --execute \
@@ -47,11 +47,11 @@ jupyter nbconvert --to notebook --execute \
     "$NOTEBOOK"
 
 echo ""
-echo "✅ Notebook executed successfully!"
+echo "Notebook executed successfully."
 echo ""
 
 # Check outputs
-echo "📊 Checking output files..."
+echo "Checking output files..."
 
 FILES=(
     "results/external_summary.json"
@@ -64,14 +64,13 @@ FILES=(
 
 for file in "${FILES[@]}"; do
     if [ -f "$PROJECT_ROOT/$file" ]; then
-        echo "   ✅ $file"
+        echo "   OK $file"
     else
-        echo "   ❌ $file (missing)"
+        echo "   MISSING $file"
     fi
 done
 
 echo ""
 echo "=============================================="
-echo "🎉 External validation complete!"
+echo "Same-source temporal validation complete."
 echo "=============================================="
-
