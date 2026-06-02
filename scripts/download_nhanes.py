@@ -50,7 +50,7 @@ def download_nhanes_data(cycles=None, components=None):
     Args:
         cycles: List of cycles to download, e.g., ["2011-2012", "2013-2014"]
                 If None, downloads all cycles.
-        components: List of components to download, e.g., ["demographics", "oral_health_exam"]
+        components: List of components to download, e.g., ["demographics", "periodontal"]
                    If None, downloads all components.
     """
     if cycles is None:

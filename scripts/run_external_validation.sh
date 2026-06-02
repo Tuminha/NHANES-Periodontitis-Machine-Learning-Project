@@ -3,8 +3,8 @@
 # Same-source temporal validation script for NHANES 2009-2010
 # ==============================================================================
 # 
-# This script runs the temporal validation notebook non-interactively,
-# generating all figures and result files.
+# This script runs the temporal validation Python workflow non-interactively,
+# generating the canonical temporal-validation result files.
 #
 # Usage:
 #   bash scripts/run_external_validation.sh
@@ -14,8 +14,6 @@
 #   - results/external_0910_metrics.json
 #   - results/prevalence_check.json
 #   - results/decision_curve_external.json
-#   - figures/external_roc_pr_calibration.png
-#   - figures/decision_curve_external.png
 # ==============================================================================
 
 set -e  # Exit on error
@@ -30,24 +28,11 @@ PROJECT_ROOT=$(pwd)
 
 echo "Project root: $PROJECT_ROOT"
 
-# Check if notebook exists
-NOTEBOOK="$PROJECT_ROOT/notebooks/01_external_validation.ipynb"
-if [ ! -f "$NOTEBOOK" ]; then
-    echo "Error: Notebook not found at $NOTEBOOK"
-    exit 1
-fi
-
-echo "Running notebook: $NOTEBOOK"
-
-# Execute notebook
-jupyter nbconvert --to notebook --execute \
-    --ExecutePreprocessor.timeout=3600 \
-    --ExecutePreprocessor.kernel_name=python3 \
-    --output="01_external_validation_executed.ipynb" \
-    "$NOTEBOOK"
+echo "Running maintained temporal validation script"
+"${PYTHON:-python3}" scripts/run_temporal_validation.py
 
 echo ""
-echo "Notebook executed successfully."
+echo "Temporal validation script executed successfully."
 echo ""
 
 # Check outputs
@@ -58,8 +43,6 @@ FILES=(
     "results/external_0910_metrics.json"
     "results/prevalence_check.json"
     "results/decision_curve_external.json"
-    "figures/external_roc_pr_calibration.png"
-    "figures/decision_curve_external.png"
 )
 
 for file in "${FILES[@]}"; do

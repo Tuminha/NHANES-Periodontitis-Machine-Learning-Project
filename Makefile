@@ -1,4 +1,7 @@
-.PHONY: help setup setup-lock download process train reproduce temporal test consistency notebook clean figures lock dirs manuscript
+SHELL := /bin/bash
+PYTHON ?= ./venv/bin/python
+
+.PHONY: help setup setup-lock download process train reproduce temporal test consistency verify-submission reproduce-full notebook clean figures lock dirs manuscript
 
 help:
 	@echo "NHANES Periodontitis ML Project - Make Commands"
@@ -21,6 +24,8 @@ help:
 	@echo ""
 	@echo "Publication:"
 	@echo "  make consistency  - Check result and manuscript consistency"
+	@echo "  make verify-submission - Run lightweight submission-readiness checks"
+	@echo "  make reproduce-full - Run full local reproduction workflow"
 	@echo "  make manuscript   - Render PDF manuscript if pandoc is installed"
 	@echo "  make figures      - Generate publication figures from saved results"
 	@echo ""
@@ -44,36 +49,61 @@ setup-lock:
 
 test:
 	@echo "Running pytest unit tests..."
-	./venv/bin/python -m pytest tests/ -v --tb=short
+	$(PYTHON) -m pytest tests/ -v --tb=short
 	@echo "Tests complete"
 
 consistency:
 	@echo "Checking publication consistency..."
-	python3 scripts/check_publication_consistency.py
+	$(PYTHON) scripts/check_publication_consistency.py
 	@echo "Publication consistency checks passed"
+
+verify-submission:
+	@echo "Running submission-readiness checks..."
+	$(MAKE) test
+	$(MAKE) consistency
+	$(PYTHON) scripts/verify_submission.py
+	$(PYTHON) scripts/05_number_manuscript_lines.py
+	@echo "Submission-readiness checks complete"
 
 download:
 	@echo "Downloading NHANES data..."
-	python3 scripts/01_download_nhanes_data.py
+	$(PYTHON) scripts/01_download_nhanes_data.py
 	@echo "Download complete"
 
 process:
 	@echo "Processing and merging NHANES components..."
-	python3 scripts/02_process_nhanes_data.py
+	$(PYTHON) scripts/02_process_nhanes_data.py
 	@echo "Processing complete"
 
 train:
 	@echo "Training models..."
-	python3 scripts/03_train_models.py
+	$(PYTHON) scripts/03_train_models.py
 	@echo "Training complete"
 
 reproduce:
 	@echo "Running primary-model reproduction workflow..."
-	bash scripts/run_v13_primary.sh
+	$(PYTHON) scripts/reproduce_v13_primary.py
 
 temporal:
 	@echo "Running same-source temporal validation workflow..."
-	bash scripts/run_external_validation.sh
+	$(PYTHON) scripts/run_temporal_validation.py
+
+reproduce-full:
+	@mkdir -p logs
+	@set -euo pipefail; \
+	LOG="logs/full_reproduction_$$(date -u +%Y%m%dT%H%M%SZ).log"; \
+	echo "Writing full reproduction log to $$LOG"; \
+	{ \
+		$(MAKE) download; \
+		$(MAKE) process; \
+		$(MAKE) reproduce; \
+		$(MAKE) temporal; \
+		$(PYTHON) scripts/04_publication_analyses.py \
+			--input data/processed/publication_predictions.parquet \
+			--feature-cols age bmi waist_cm waist_height height_cm systolic_bp diastolic_bp glucose triglycerides hdl; \
+		$(MAKE) consistency; \
+		$(MAKE) verify-submission; \
+	} 2>&1 | tee "$$LOG"
 
 notebook:
 	@echo "Launching Jupyter notebook..."
@@ -85,7 +115,7 @@ figures:
 
 manuscript:
 	@echo "Rendering manuscript if pandoc is installed..."
-	python3 scripts/05_number_manuscript_lines.py
+	$(PYTHON) scripts/05_number_manuscript_lines.py
 	@if command -v pandoc >/dev/null 2>&1; then \
 		mkdir -p reports; \
 		pandoc docs/publication/ARTICLE_DRAFT.md \

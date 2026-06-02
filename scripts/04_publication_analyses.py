@@ -96,7 +96,7 @@ def main() -> None:
     input_path = Path(args.input)
     if not input_path.exists():
         raise FileNotFoundError(
-            f"Input table not found: {input_path}. Generate it from the processing and validation notebooks first."
+            f"Input table not found: {input_path}. Run `make process && make temporal` first."
         )
 
     df = load_table(input_path)

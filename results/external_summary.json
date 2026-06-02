@@ -1,34 +1,25 @@
 {
   "dataset": "NHANES 2009-2010",
   "validation_design": "same-source temporal validation",
-  "n": 5177,
-  "prevalence": 0.672,
-  "auc": 0.677,
-  "auc_ci": [0.661, 0.693],
-  "pr_auc": 0.773,
-  "pr_auc_ci": [0.757, 0.789],
-  "brier": 0.200,
-  "brier_ci": [0.194, 0.207],
+  "n": 5037,
+  "prevalence": 0.6906889021242804,
+  "auc": 0.6494935134371237,
+  "prauc": 0.7727428229243357,
+  "brier": 0.20225240210310863,
   "rule_out": {
     "threshold": 0.35,
-    "sensitivity": 0.971,
-    "specificity": 0.181,
-    "ppv": 0.708,
-    "npv": 0.752
+    "sensitivity": 0.9890773210692728,
+    "specificity": 0.05455712451861361,
+    "ppv": 0.7002442002442002,
+    "npv": 0.6910569105691057
   },
   "balanced": {
     "threshold": 0.65,
-    "sensitivity": 0.826,
-    "specificity": 0.433,
-    "ppv": 0.749,
-    "npv": 0.549
+    "sensitivity": 0.7766599597585513,
+    "specificity": 0.45186136071887034,
+    "ppv": 0.7598425196850394,
+    "npv": 0.475354490209318
   },
-  "temporal_comparison": {
-    "internal_auc": 0.717,
-    "temporal_auc": 0.677,
-    "auc_drop": 0.040,
-    "auc_drop_pct": 5.6
-  },
-  "source": "notebooks/01_external_validation.ipynb",
-  "timestamp": "2025-12-02"
+  "source": "scripts/run_temporal_validation.py",
+  "timestamp": "2026-06-02T08:18:13+00:00"
 }

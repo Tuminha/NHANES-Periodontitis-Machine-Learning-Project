@@ -1,66 +1,60 @@
 {
   "model": "v1.3_primary_no_reverse_causality",
-  "description": "Primary model for publication - excludes treatment-seeking features",
+  "description": "Primary benchmark model excluding treatment-seeking variables",
   "dataset": "NHANES 2011-2014",
-  "n_samples": 9379,
+  "n_samples": 9034,
   "n_features": 29,
-  "prevalence": 0.683,
-  "dropped_features": [
-    "dental_visit",
-    "floss_days", 
-    "mobile_teeth",
-    "floss_days_missing"
-  ],
-  "rationale": "Removes treatment-seeking bias with only small AUC cost and slightly better balanced specificity",
+  "prevalence": 0.7089882665485941,
   "metrics": {
-    "auc_roc": 0.7172,
-    "pr_auc": 0.8157,
-    "brier_score": 0.1812
+    "auc_roc": 0.6896307296060366,
+    "pr_auc": 0.8239764216424541,
+    "brier_score": 0.18712707529235736
   },
   "operating_points": {
     "rule_out": {
-      "name": "Rule-Out (High Sensitivity)",
+      "name": "High-sensitivity triage",
       "threshold": 0.35,
-      "recall": 0.999,
-      "specificity": 0.124,
-      "precision": 0.692,
-      "npv": 0.96,
-      "f1": 0.818,
-      "use_case": "Initial screening. Negative result rules out disease."
+      "recall": 0.986104605776737,
+      "specificity": 0.06466337010270065,
+      "precision": 0.7197720797720798,
+      "npv": 0.6563706563706564,
+      "f1": 0.8321475625823452,
+      "use_case": "Triage operating point; periodontal examination remains required."
     },
     "balanced": {
-      "name": "Balanced (Youden J)",
+      "name": "Balanced triage",
       "threshold": 0.65,
-      "recall": 0.728,
-      "specificity": 0.592,
-      "precision": 0.79,
-      "npv": 0.51,
-      "f1": 0.758,
-      "youden_j": 0.32,
-      "use_case": "Clinical decision-making. Balanced tradeoff."
+      "recall": 0.75160031225605,
+      "specificity": 0.5195891974134652,
+      "precision": 0.792167187757117,
+      "npv": 0.4619546838011498,
+      "f1": 0.771350745072905,
+      "use_case": "Triage operating point; periodontal examination remains required."
     }
   },
   "confusion_matrix": {
     "rule_out": {
       "threshold": 0.35,
-      "tp": 6399,
-      "fp": 2605,
-      "tn": 369,
-      "fn": 6
+      "tp": 6316,
+      "fp": 2459,
+      "tn": 170,
+      "fn": 89
     },
     "balanced": {
       "threshold": 0.65,
-      "tp": 4666,
-      "fp": 1214,
-      "tn": 1760,
-      "fn": 1739
+      "tp": 4814,
+      "fp": 1263,
+      "tn": 1366,
+      "fn": 1591
     }
   },
-  "calibration": "isotonic_regression",
-  "monotonic_constraints": {
-    "increasing": ["age", "bmi", "waist_cm", "waist_height", "systolic_bp", "diastolic_bp", "glucose", "triglycerides"],
-    "decreasing": ["hdl"]
-  },
-  "timestamp": "2025-12-02T00:00:00Z"
+  "calibration": "nested_isotonic_regression",
+  "timestamp": "2026-06-02T08:17:59+00:00",
+  "dropped_features": [
+    "dental_visit",
+    "floss_days",
+    "mobile_teeth",
+    "floss_days_missing"
+  ],
+  "rationale": "Removes treatment-seeking variables with limited discrimination cost."
 }
-

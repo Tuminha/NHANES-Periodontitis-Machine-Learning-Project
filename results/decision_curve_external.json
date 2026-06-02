@@ -2,10 +2,10 @@
   "model": "v1.3_primary",
   "dataset": "NHANES 2009-2010",
   "validation_design": "same-source temporal validation",
-  "description": "Decision curve analysis showing net benefit vs treat-all and treat-none",
+  "description": "Decision-curve net benefit at manuscript operating points",
   "data_summary": {
-    "model_at_0.35": 0.5142793591702226,
-    "model_at_0.65": 0.21024310825353898
+    "model_at_0.35": 0.5256792046547855,
+    "model_at_0.65": 0.22156045265038715
   },
-  "timestamp": "2025-12-02T20:43:36.175449"
+  "timestamp": "2026-06-02T08:18:13+00:00"
 }
