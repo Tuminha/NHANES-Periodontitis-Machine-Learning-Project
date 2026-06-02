@@ -43,22 +43,8 @@ print('All dependencies installed')
 "
 echo ""
 
-# Run notebook sections via papermill (if available) or jupyter nbconvert
-echo "Running notebook..."
-echo ""
-
-if command -v papermill &> /dev/null; then
-    echo "Using papermill..."
-    papermill notebooks/00_nhanes_periodontitis_end_to_end.ipynb \
-               notebooks/00_nhanes_periodontitis_end_to_end_executed.ipynb \
-               --no-progress-bar
-else
-    echo "Using jupyter nbconvert..."
-    jupyter nbconvert --to notebook --execute \
-        --ExecutePreprocessor.timeout=3600 \
-        --output 00_nhanes_periodontitis_end_to_end_executed.ipynb \
-        notebooks/00_nhanes_periodontitis_end_to_end.ipynb
-fi
+echo "Running maintained Python reproduction script..."
+"${PYTHON:-python3}" scripts/reproduce_v13_primary.py
 
 echo ""
 echo "============================================================"
@@ -72,15 +58,4 @@ echo "   - results/v13_operating_points.json"
 echo "   - results/v13_featuredrop.json"
 echo "   - results/v13_nan_ablation.json"
 echo "   - results/v13_shap_summary.json"
-echo ""
-echo "Figures saved to:"
-echo "   - figures/14_v13_operating_points.png"
-echo "   - figures/15_shap_beeswarm.png"
-echo "   - figures/16_shap_importance.png"
-echo "   - figures/17_shap_dependence.png"
-echo "   - figures/18_nan_ablation.png"
-echo ""
-echo "Git tags available:"
-echo "   - v1.3-primary-norc"
-echo "   - v1.3-secondary-full"
 echo ""

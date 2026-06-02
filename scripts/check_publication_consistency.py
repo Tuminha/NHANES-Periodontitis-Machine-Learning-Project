@@ -1,29 +1,13 @@
 #!/usr/bin/env python3
-"""Check that publication-facing files use the same canonical results."""
+"""Check that publication-facing files use the same current result artifacts."""
 
 from __future__ import annotations
 
 import json
-import math
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-
-EXPECTED = {
-    "primary_features": 29,
-    "secondary_features": 33,
-    "primary_auc": 0.717245742046474,
-    "primary_pr_auc": 0.8157447372867956,
-    "secondary_auc": 0.7255326805774952,
-    "temporal_auc": 0.6771141964954918,
-    "temporal_pr_auc": 0.7734533687334428,
-    "temporal_brier": 0.20025236260487186,
-    "temporal_rule_out_sensitivity": 0.970968669157804,
-    "temporal_rule_out_specificity": 0.18080094228504123,
-    "temporal_balanced_sensitivity": 0.8263868927852831,
-    "temporal_balanced_specificity": 0.4334511189634865,
-}
 
 DOCS = [
     ROOT / "README.md",
@@ -50,57 +34,73 @@ def load_json(path: str) -> dict:
         return json.load(f)
 
 
-def close(actual: float, expected: float, tol: float = 1e-6) -> bool:
-    return math.isclose(float(actual), float(expected), rel_tol=tol, abs_tol=tol)
+def fmt4(value: float) -> str:
+    return f"{float(value):.4f}"
 
 
-def assert_close(label: str, actual: float, expected: float) -> None:
-    if not close(actual, expected):
-        raise AssertionError(f"{label}: expected {expected}, got {actual}")
+def pct1(value: float) -> str:
+    return f"{float(value) * 100:.1f}%"
+
+
+def canonical_values() -> dict[str, float | int | str]:
+    featuredrop = load_json("results/v13_featuredrop.json")
+    temporal = load_json("results/external_0910_metrics.json")
+    primary = featuredrop["v1.3_no_reverse_causality"]
+    secondary = featuredrop["v1.3_full"]
+    rule_out = temporal["operating_points"]["rule_out_t_0.35"]
+    balanced = temporal["operating_points"]["balanced_t_0.65"]
+    return {
+        "primary_features": int(primary["n_features"]),
+        "secondary_features": int(secondary["n_features"]),
+        "primary_auc": float(primary["auc"]),
+        "primary_pr_auc": float(primary["pr_auc"]),
+        "secondary_auc": float(secondary["auc"]),
+        "secondary_pr_auc": float(secondary["pr_auc"]),
+        "temporal_auc": float(temporal["metrics"]["auc"]["mean"]),
+        "temporal_pr_auc": float(temporal["metrics"]["prauc"]["mean"]),
+        "temporal_brier": float(temporal["metrics"]["brier"]["mean"]),
+        "temporal_rule_out_sensitivity": float(rule_out["sensitivity"]),
+        "temporal_rule_out_specificity": float(rule_out["specificity"]),
+        "temporal_balanced_sensitivity": float(balanced["sensitivity"]),
+        "temporal_balanced_specificity": float(balanced["specificity"]),
+    }
 
 
 def check_result_files() -> None:
-    featuredrop = load_json("results/v13_featuredrop.json")
-    temporal = load_json("results/external_0910_metrics.json")
+    values = canonical_values()
+    if values["primary_features"] != 29:
+        raise AssertionError(f"Primary feature count must be 29, got {values['primary_features']}")
+    if values["secondary_features"] != 33:
+        raise AssertionError(f"Secondary feature count must be 33, got {values['secondary_features']}")
+    for key in [
+        "primary_auc",
+        "primary_pr_auc",
+        "secondary_auc",
+        "secondary_pr_auc",
+        "temporal_auc",
+        "temporal_pr_auc",
+        "temporal_brier",
+    ]:
+        value = float(values[key])
+        if not 0 <= value <= 1:
+            raise AssertionError(f"{key} must be in [0, 1], got {value}")
 
-    primary = featuredrop["v1.3_no_reverse_causality"]
-    secondary = featuredrop["v1.3_full"]
 
-    assert primary["n_features"] == EXPECTED["primary_features"]
-    assert secondary["n_features"] == EXPECTED["secondary_features"]
-    assert_close("primary AUC", primary["auc"], EXPECTED["primary_auc"])
-    assert_close("primary PR-AUC", primary["pr_auc"], EXPECTED["primary_pr_auc"])
-    assert_close("secondary AUC", secondary["auc"], EXPECTED["secondary_auc"])
-
-    assert_close("temporal AUC", temporal["metrics"]["auc"]["mean"], EXPECTED["temporal_auc"])
-    assert_close("temporal PR-AUC", temporal["metrics"]["prauc"]["mean"], EXPECTED["temporal_pr_auc"])
-    assert_close("temporal Brier", temporal["metrics"]["brier"]["mean"], EXPECTED["temporal_brier"])
-
-    rule_out = temporal["operating_points"]["rule_out_t_0.35"]
-    balanced = temporal["operating_points"]["balanced_t_0.65"]
-    assert_close(
-        "temporal rule-out sensitivity",
-        rule_out["sensitivity"],
-        EXPECTED["temporal_rule_out_sensitivity"],
-    )
-    assert_close(
-        "temporal rule-out specificity",
-        rule_out["specificity"],
-        EXPECTED["temporal_rule_out_specificity"],
-    )
-    assert_close(
-        "temporal balanced sensitivity",
-        balanced["sensitivity"],
-        EXPECTED["temporal_balanced_sensitivity"],
-    )
-    assert_close(
-        "temporal balanced specificity",
-        balanced["specificity"],
-        EXPECTED["temporal_balanced_specificity"],
-    )
+def required_strings(values: dict) -> list[str]:
+    return [
+        str(values["primary_features"]),
+        str(values["secondary_features"]),
+        fmt4(values["primary_auc"]),
+        fmt4(values["primary_pr_auc"]),
+        fmt4(values["secondary_auc"]),
+        fmt4(values["secondary_pr_auc"]),
+        fmt4(values["temporal_auc"]),
+        fmt4(values["temporal_pr_auc"]),
+    ]
 
 
 def check_docs() -> None:
+    values = canonical_values()
     for path in DOCS:
         text = path.read_text(encoding="utf-8")
         for phrase in BANNED_PHRASES:
@@ -108,9 +108,10 @@ def check_docs() -> None:
                 rel = path.relative_to(ROOT)
                 raise AssertionError(f"{rel} contains banned phrase: {phrase}")
 
-        if "29" not in text or "33" not in text:
+        missing = [value for value in required_strings(values) if value not in text]
+        if missing:
             rel = path.relative_to(ROOT)
-            raise AssertionError(f"{rel} must mention canonical 29/33 feature counts")
+            raise AssertionError(f"{rel} is missing current result values: {missing}")
 
         if "same-source temporal validation" not in text.lower():
             rel = path.relative_to(ROOT)

@@ -70,8 +70,8 @@ make setup-lock
 source venv/bin/activate
 make test
 make consistency
-make reproduce
-make temporal
+make verify-submission
+make reproduce-full
 ```
 
 The consistency check enforces agreement between result artifacts, README, this model card, and the manuscript source.

@@ -26,7 +26,7 @@
       "precision": 0.706,
       "npv": 0.83,
       "f1": 0.824,
-      "use_case": "Initial screening. Negative result rules out disease."
+      "use_case": "High-sensitivity triage; periodontal examination remains required."
     },
     "balanced": {
       "name": "Balanced (Youden J)",
@@ -37,7 +37,7 @@
       "npv": 0.52,
       "f1": 0.772,
       "youden_j": 0.331,
-      "use_case": "Clinical decision-making. Balanced tradeoff."
+      "use_case": "Balanced triage; periodontal examination remains required."
     }
   },
   "confusion_matrix": {
@@ -63,4 +63,3 @@
   },
   "timestamp": "2025-12-02T00:00:00Z"
 }
-

@@ -22,6 +22,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.labels import label_periodontitis
+from src.reproduction import build_modeling_frame
 
 # Directories
 DATA_DIR = Path("data")
@@ -49,6 +50,7 @@ BMX_VARS = {
     'SEQN': 'participant_id',
     'BMXBMI': 'bmi',
     'BMXWAIST': 'waist_circumference',
+    'BMXHT': 'height_cm',
 }
 
 # Blood Pressure (BPX)
@@ -82,6 +84,7 @@ OHQ_VARS = {
     'OHQ030': 'time_since_dental_visit',  # 1=6mo, 2=1yr, 3=2yr, etc.
     'OHQ620': 'floss_days_per_week',
     'OHQ845': 'loose_teeth',  # 1=Yes, 2=No
+    'OHQ680': 'mobile_teeth',
 }
 
 # =============================================================================
@@ -318,8 +321,9 @@ def process_cycle(cycle: str) -> pd.DataFrame:
     
     # Merge other components
     if 'body_measures' in dfs:
-        bm = dfs['body_measures'][['SEQN', 'BMXBMI', 'BMXWAIST']].copy()
-        bm.columns = ['participant_id', 'bmi', 'waist_circumference']
+        bm_cols = [c for c in BMX_VARS if c in dfs['body_measures'].columns]
+        bm = dfs['body_measures'][bm_cols].copy()
+        bm.columns = [BMX_VARS[c] for c in bm_cols]
         df = df.merge(bm, on='participant_id', how='left')
     
     if 'blood_pressure' in dfs:
@@ -331,8 +335,9 @@ def process_cycle(cycle: str) -> pd.DataFrame:
         df = df.merge(bp, on='participant_id', how='left')
     
     if 'smoking' in dfs:
-        sm = dfs['smoking'][['SEQN', 'SMQ020']].copy()
-        sm.columns = ['participant_id', 'smoked_100_cigs']
+        sm_cols = [c for c in SMQ_VARS if c in dfs['smoking'].columns]
+        sm = dfs['smoking'][sm_cols].copy()
+        sm.columns = [SMQ_VARS[c] for c in sm_cols]
         df = df.merge(sm, on='participant_id', how='left')
 
     if 'alcohol' in dfs:
@@ -342,14 +347,9 @@ def process_cycle(cycle: str) -> pd.DataFrame:
         df = df.merge(alq, on='participant_id', how='left')
     
     if 'oral_health_questionnaire' in dfs:
-        ohq_cols = ['SEQN']
-        for c in ['OHQ030', 'OHQ620', 'OHQ845']:
-            if c in dfs['oral_health_questionnaire'].columns:
-                ohq_cols.append(c)
+        ohq_cols = [c for c in OHQ_VARS if c in dfs['oral_health_questionnaire'].columns]
         ohq = dfs['oral_health_questionnaire'][ohq_cols].copy()
-        col_map = {'SEQN': 'participant_id', 'OHQ030': 'time_since_dental_visit',
-                   'OHQ620': 'floss_days_per_week', 'OHQ845': 'loose_teeth'}
-        ohq.columns = [col_map.get(c, c) for c in ohq.columns]
+        ohq.columns = [OHQ_VARS[c] for c in ohq_cols]
         df = df.merge(ohq, on='participant_id', how='left')
 
     if 'glucose' in dfs and 'LBXGLU' in dfs['glucose'].columns:
@@ -376,6 +376,7 @@ def process_cycle(cycle: str) -> pd.DataFrame:
         labeled = label_periodontitis(dfs['periodontal'].copy())
         labels = labeled[['SEQN', 'perio_class', 'has_periodontitis']].copy()
         labels.columns = ['participant_id', 'perio_class', 'has_periodontitis']
+        labels['periodontitis_binary'] = labels['has_periodontitis'].astype(int)
         df = df.merge(labels, on='participant_id', how='inner')
     
     # Add cycle identifier
@@ -414,6 +415,11 @@ def main():
         output_path = PROCESSED_DIR / "nhanes_combined.parquet"
         df_combined.to_parquet(output_path)
         print(f"\nSaved to {output_path}")
+
+        modeling_path = PROCESSED_DIR / "nhanes_modeling_frame.parquet"
+        modeling_frame = build_modeling_frame(df_combined)
+        modeling_frame.to_parquet(modeling_path)
+        print(f"Saved modeling frame to {modeling_path}")
         
         # Print summary
         print(f"\n{'='*60}")

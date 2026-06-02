@@ -51,18 +51,13 @@ Run lightweight checks that do not require NHANES data:
 ```bash
 make test
 make consistency
+make verify-submission
 ```
 
-Run the full workflows after NHANES data are available:
+Run the full local reproduction after NHANES data are available:
 
 ```bash
-make download
-make process
-make reproduce
-make temporal
-python3 scripts/04_publication_analyses.py \
-  --input data/processed/publication_predictions.parquet \
-  --feature-cols age bmi waist_cm systolic_bp diastolic_bp glucose triglycerides hdl
+make reproduce-full
 ```
 
 The legacy notebooks are retired as source-of-truth artifacts. The maintained publication surface is the script targets, result artifacts, model card, tests, and manuscript source, with consistency checks to prevent silent drift across those files.
@@ -75,6 +70,9 @@ The legacy notebooks are retired as source-of-truth artifacts. The maintained pu
 | `src/evaluation.py` | Metrics, threshold selection, calibration, and plotting helpers |
 | `src/publication_analysis.py` | Survey-weighted prevalence, subgroup performance, and missingness tables |
 | `scripts/check_publication_consistency.py` | Guards canonical values and conservative publication wording |
+| `scripts/verify_submission.py` | Runs lightweight submission-readiness gates |
+| `scripts/reproduce_v13_primary.py` | Regenerates internal v1.3 benchmark result artifacts |
+| `scripts/run_temporal_validation.py` | Regenerates same-source temporal validation artifacts |
 | `scripts/04_publication_analyses.py` | Generates publication sensitivity tables from processed predictions |
 | `results/` | Saved result artifacts used by the manuscript and model card |
 | `docs/publication/ARTICLE_DRAFT.md` | Current manuscript source |
