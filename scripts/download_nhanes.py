@@ -10,58 +10,36 @@ from pathlib import Path
 DATA_DIR = Path("data/raw")
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 
-# NHANES file URLs - these are the EXACT URLs from CDC
-# Format: https://wwwn.cdc.gov/Nchs/Nhanes/{CYCLE}/{FILENAME}.XPT
+# NHANES file URLs from the current CDC public data-file endpoint.
+
+BASE_URL = "https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public"
+CYCLES = {
+    "2009-2010": ("2009", "F"),
+    "2011-2012": ("2011", "G"),
+    "2013-2014": ("2013", "H"),
+}
+COMPONENTS = {
+    "demographics": "DEMO",
+    "body_measures": "BMX",
+    "blood_pressure": "BPX",
+    "smoking": "SMQ",
+    "alcohol": "ALQ",
+    "periodontal": "OHXPER",
+    "oral_health_questionnaire": "OHQ",
+    "glucose": "GLU",
+    "triglycerides": "TRIGLY",
+    "hdl": "HDL",
+}
+
+
+def nhanes_url(cycle: str, prefix: str) -> str:
+    start_year, suffix = CYCLES[cycle]
+    return f"{BASE_URL}/{start_year}/DataFiles/{prefix}_{suffix}.xpt"
+
 
 NHANES_FILES = {
-    "2011-2012": {
-        "demographics": "https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/DEMO_G.XPT",
-        "body_measures": "https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/BMX_G.XPT",
-        "blood_pressure": "https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/BPX_G.XPT",
-        "smoking": "https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/SMQ_G.XPT",
-        "alcohol": "https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/ALQ_G.XPT",
-        "oral_health_exam": "https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/OHXPER_G.XPT",
-        "oral_health_questionnaire": "https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/OHQ_G.XPT",
-        "glucose": "https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/GLU_G.XPT",
-        "triglycerides": "https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/TRIGLY_G.XPT",
-        "hdl": "https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/HDL_G.XPT",
-    },
-    "2013-2014": {
-        "demographics": "https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/DEMO_H.XPT",
-        "body_measures": "https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/BMX_H.XPT",
-        "blood_pressure": "https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/BPX_H.XPT",
-        "smoking": "https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/SMQ_H.XPT",
-        "alcohol": "https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/ALQ_H.XPT",
-        "oral_health_exam": "https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/OHXPER_H.XPT",
-        "oral_health_questionnaire": "https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/OHQ_H.XPT",
-        "glucose": "https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/GLU_H.XPT",
-        "triglycerides": "https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/TRIGLY_H.XPT",
-        "hdl": "https://wwwn.cdc.gov/Nchs/Nhanes/2013-2014/HDL_H.XPT",
-    },
-    "2015-2016": {
-        "demographics": "https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/DEMO_I.XPT",
-        "body_measures": "https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/BMX_I.XPT",
-        "blood_pressure": "https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/BPX_I.XPT",
-        "smoking": "https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/SMQ_I.XPT",
-        "alcohol": "https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/ALQ_I.XPT",
-        "oral_health_exam": "https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/OHXPER_I.XPT",
-        "oral_health_questionnaire": "https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/OHQ_I.XPT",
-        "glucose": "https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/GLU_I.XPT",
-        "triglycerides": "https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/TRIGLY_I.XPT",
-        "hdl": "https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/HDL_I.XPT",
-    },
-    "2017-2018": {
-        "demographics": "https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/DEMO_J.XPT",
-        "body_measures": "https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/BMX_J.XPT",
-        "blood_pressure": "https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/BPX_J.XPT",
-        "smoking": "https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/SMQ_J.XPT",
-        "alcohol": "https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/ALQ_J.XPT",
-        "oral_health_exam": "https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/OHXPER_J.XPT",
-        "oral_health_questionnaire": "https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/OHQ_J.XPT",
-        "glucose": "https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/GLU_J.XPT",
-        "triglycerides": "https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/TRIGLY_J.XPT",
-        "hdl": "https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/HDL_J.XPT",
-    },
+    cycle: {component: nhanes_url(cycle, prefix) for component, prefix in COMPONENTS.items()}
+    for cycle in CYCLES
 }
 
 
@@ -97,7 +75,7 @@ def download_nhanes_data(cycles=None, components=None):
         
         for component in components_to_download:
             if component not in NHANES_FILES[cycle]:
-                print(f"  ⚠ {component} not available for {cycle}")
+                print(f"  Warning: {component} not available for {cycle}")
                 continue
                 
             url = NHANES_FILES[cycle][component]
@@ -141,7 +119,7 @@ if __name__ == "__main__":
     # Download 2011-2012 first (the cycle Bashir used)
     data = download_nhanes_data(
         cycles=["2011-2012"],
-        components=["demographics", "oral_health_exam", "body_measures", 
+        components=["demographics", "periodontal", "body_measures",
                    "blood_pressure", "smoking", "oral_health_questionnaire"]
     )
     

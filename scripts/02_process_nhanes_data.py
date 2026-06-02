@@ -13,8 +13,15 @@ This script:
 import pandas as pd
 import numpy as np
 from pathlib import Path
+import sys
 import warnings
 warnings.filterwarnings('ignore')
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.labels import label_periodontitis
 
 # Directories
 DATA_DIR = Path("data")
@@ -32,6 +39,9 @@ DEMO_VARS = {
     'RIAGENDR': 'sex',  # 1=Male, 2=Female
     'DMDEDUC2': 'education',  # Education level - adults 20+
     'RIDRETH3': 'race_ethnicity',
+    'WTMEC2YR': 'exam_weight',
+    'SDMVPSU': 'survey_psu',
+    'SDMVSTRA': 'survey_strata',
 }
 
 # Body Measures (BMX)
@@ -57,6 +67,13 @@ SMQ_VARS = {
     'SEQN': 'participant_id',
     'SMQ020': 'smoked_100_cigs',  # 1=Yes, 2=No (lifetime)
     'SMQ040': 'smoking_now',  # 1=Every day, 2=Some days, 3=Not at all
+}
+
+# Alcohol (ALQ)
+ALQ_VARS = {
+    'SEQN': 'participant_id',
+    'ALQ101': 'ever_12_drinks_year',
+    'ALQ110': 'ever_12_drinks_lifetime',
 }
 
 # Oral Health Questionnaire (OHQ)
@@ -215,9 +232,13 @@ def create_bashir_predictors(df: pd.DataFrame) -> pd.DataFrame:
     # SMQ020: 1=Yes smoked 100+ cigs, 2=No
     features['ever_smoker'] = (df['smoked_100_cigs'] == 1).astype(int)
     
-    # 5. Alcohol consumption (need to add - check ALQ component)
-    # Placeholder - will need to download ALQ component
-    features['ever_drinker'] = np.nan
+    # 5. Alcohol consumption
+    if 'ever_12_drinks_year' in df.columns:
+        features['ever_drinker'] = (df['ever_12_drinks_year'] == 1).astype(float)
+    elif 'ever_12_drinks_lifetime' in df.columns:
+        features['ever_drinker'] = (df['ever_12_drinks_lifetime'] == 1).astype(float)
+    else:
+        features['ever_drinker'] = np.nan
     
     # 6. BMI
     features['bmi'] = df['bmi']
@@ -275,7 +296,8 @@ def process_cycle(cycle: str) -> pd.DataFrame:
     # Load all components
     dfs = {}
     for component in ['demographics', 'body_measures', 'blood_pressure', 
-                      'smoking', 'oral_health_questionnaire', 'periodontal']:
+                      'smoking', 'alcohol', 'oral_health_questionnaire',
+                      'periodontal', 'glucose', 'triglycerides', 'hdl']:
         fpath = cycle_dir / f"{component}.parquet"
         if fpath.exists():
             dfs[component] = pd.read_parquet(fpath)
@@ -286,8 +308,9 @@ def process_cycle(cycle: str) -> pd.DataFrame:
         return None
     
     # Start with demographics
-    df = dfs['demographics'][['SEQN', 'RIDAGEYR', 'RIAGENDR', 'DMDEDUC2']].copy()
-    df.columns = ['participant_id', 'age', 'sex', 'education']
+    demo_cols = [c for c in DEMO_VARS if c in dfs['demographics'].columns]
+    df = dfs['demographics'][demo_cols].copy()
+    df.columns = [DEMO_VARS[c] for c in demo_cols]
     
     # Filter to adults 30+ (standard for periodontitis surveillance)
     df = df[df['age'] >= 30].copy()
@@ -311,6 +334,12 @@ def process_cycle(cycle: str) -> pd.DataFrame:
         sm = dfs['smoking'][['SEQN', 'SMQ020']].copy()
         sm.columns = ['participant_id', 'smoked_100_cigs']
         df = df.merge(sm, on='participant_id', how='left')
+
+    if 'alcohol' in dfs:
+        alq_cols = [c for c in ALQ_VARS if c in dfs['alcohol'].columns]
+        alq = dfs['alcohol'][alq_cols].copy()
+        alq.columns = [ALQ_VARS[c] for c in alq_cols]
+        df = df.merge(alq, on='participant_id', how='left')
     
     if 'oral_health_questionnaire' in dfs:
         ohq_cols = ['SEQN']
@@ -322,6 +351,32 @@ def process_cycle(cycle: str) -> pd.DataFrame:
                    'OHQ620': 'floss_days_per_week', 'OHQ845': 'loose_teeth'}
         ohq.columns = [col_map.get(c, c) for c in ohq.columns]
         df = df.merge(ohq, on='participant_id', how='left')
+
+    if 'glucose' in dfs and 'LBXGLU' in dfs['glucose'].columns:
+        glu_cols = ['SEQN', 'LBXGLU']
+        if 'WTSAF2YR' in dfs['glucose'].columns:
+            glu_cols.append('WTSAF2YR')
+        glu = dfs['glucose'][glu_cols].copy()
+        glu.columns = ['participant_id', 'fasting_glucose'] + (
+            ['fasting_weight'] if 'WTSAF2YR' in glu_cols else []
+        )
+        df = df.merge(glu, on='participant_id', how='left')
+
+    if 'triglycerides' in dfs and 'LBXTR' in dfs['triglycerides'].columns:
+        tr = dfs['triglycerides'][['SEQN', 'LBXTR']].copy()
+        tr.columns = ['participant_id', 'triglycerides']
+        df = df.merge(tr, on='participant_id', how='left')
+
+    if 'hdl' in dfs and 'LBDHDD' in dfs['hdl'].columns:
+        hdl = dfs['hdl'][['SEQN', 'LBDHDD']].copy()
+        hdl.columns = ['participant_id', 'hdl']
+        df = df.merge(hdl, on='participant_id', how='left')
+
+    if 'periodontal' in dfs:
+        labeled = label_periodontitis(dfs['periodontal'].copy())
+        labels = labeled[['SEQN', 'perio_class', 'has_periodontitis']].copy()
+        labels.columns = ['participant_id', 'perio_class', 'has_periodontitis']
+        df = df.merge(labels, on='participant_id', how='inner')
     
     # Add cycle identifier
     df['cycle'] = cycle
@@ -340,7 +395,7 @@ def main():
     print("="*60)
     
     # Process each cycle
-    cycles = ["2011-2012", "2013-2014", "2015-2016", "2017-2018"]
+    cycles = ["2009-2010", "2011-2012", "2013-2014"]
     all_data = []
     
     for cycle in cycles:

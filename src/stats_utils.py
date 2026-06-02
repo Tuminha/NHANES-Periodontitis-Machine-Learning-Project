@@ -243,7 +243,7 @@ def save_prevalence_check(
     with open(output_path, 'w') as f:
         json.dump(results, f, indent=2)
     
-    print(f"✅ Prevalence check saved to: {output_path}")
+    print(f"Prevalence check saved to: {output_path}")
     return results
 
 
@@ -273,5 +273,4 @@ def save_permutation_results(
     with open(output_path, 'w') as f:
         json.dump(results, f, indent=2)
     
-    print(f"✅ Permutation test results saved to: {output_path}")
-
+    print(f"Permutation test results saved to: {output_path}")

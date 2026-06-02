@@ -1,92 +1,120 @@
-.PHONY: help setup download process train test notebook clean figures
+.PHONY: help setup setup-lock download process train reproduce temporal test consistency notebook clean figures lock dirs manuscript
 
-# Default target
 help:
 	@echo "NHANES Periodontitis ML Project - Make Commands"
 	@echo "================================================"
 	@echo ""
 	@echo "Setup & Environment:"
-	@echo "  make setup       - Create venv and install dependencies"
-	@echo "  make test        - Run pytest unit tests"
+	@echo "  make setup        - Create venv and install dependencies from requirements.txt"
+	@echo "  make setup-lock   - Create venv and install dependencies from requirements.lock.txt"
+	@echo "  make test         - Run pytest unit tests"
 	@echo ""
 	@echo "Data Pipeline:"
-	@echo "  make download    - Download NHANES XPT files"
-	@echo "  make process     - Merge components and apply CDC/AAP labels"
+	@echo "  make download     - Download NHANES XPT files"
+	@echo "  make process      - Merge components and apply CDC/AAP labels"
 	@echo ""
 	@echo "Modeling:"
-	@echo "  make train       - Train all models (baselines + gradient boosting)"
-	@echo "  make notebook    - Launch Jupyter notebook"
+	@echo "  make train        - Train all models"
+	@echo "  make reproduce    - Run primary-model reproduction workflow"
+	@echo "  make temporal     - Run same-source temporal validation workflow"
+	@echo "  make notebook     - Launch Jupyter notebook"
 	@echo ""
-	@echo "Artifacts:"
-	@echo "  make figures     - Generate all publication figures"
-	@echo "  make clean       - Remove generated files (figures, models, results)"
+	@echo "Publication:"
+	@echo "  make consistency  - Check result and manuscript consistency"
+	@echo "  make manuscript   - Render PDF manuscript if pandoc is installed"
+	@echo "  make figures      - Generate publication figures from saved results"
 	@echo ""
 	@echo "Reproducibility:"
-	@echo "  make freeze      - Save current package versions to requirements.txt"
-	@echo ""
+	@echo "  make lock         - Save current venv package versions to requirements.lock.txt"
+	@echo "  make clean        - Remove generated local artifacts"
 
-# Setup virtual environment
 setup:
-	@echo "🔧 Setting up Python environment..."
+	@echo "Setting up Python environment..."
 	python3 -m venv venv
 	./venv/bin/pip install --upgrade pip
 	./venv/bin/pip install -r requirements.txt
-	@echo "✅ Setup complete. Activate with: source venv/bin/activate"
+	@echo "Setup complete. Activate with: source venv/bin/activate"
 
-# Run tests
+setup-lock:
+	@echo "Setting up Python environment from lock file..."
+	python3 -m venv venv
+	./venv/bin/pip install --upgrade pip
+	./venv/bin/pip install -r requirements.lock.txt
+	@echo "Setup complete. Activate with: source venv/bin/activate"
+
 test:
-	@echo "🧪 Running pytest unit tests..."
-	pytest tests/ -v --tb=short
-	@echo "✅ Tests complete"
+	@echo "Running pytest unit tests..."
+	./venv/bin/python -m pytest tests/ -v --tb=short
+	@echo "Tests complete"
 
-# Download NHANES data
+consistency:
+	@echo "Checking publication consistency..."
+	python3 scripts/check_publication_consistency.py
+	@echo "Publication consistency checks passed"
+
 download:
-	@echo "📥 Downloading NHANES data..."
-	python 01_download_nhanes_data.py
-	@echo "✅ Download complete"
+	@echo "Downloading NHANES data..."
+	python3 scripts/01_download_nhanes_data.py
+	@echo "Download complete"
 
-# Process and merge data
 process:
-	@echo "⚙️  Processing and merging NHANES components..."
-	python 02_process_nhanes_data.py
-	@echo "✅ Processing complete"
+	@echo "Processing and merging NHANES components..."
+	python3 scripts/02_process_nhanes_data.py
+	@echo "Processing complete"
 
-# Train models
 train:
-	@echo "🤖 Training models..."
-	python 03_train_models.py
-	@echo "✅ Training complete"
+	@echo "Training models..."
+	python3 scripts/03_train_models.py
+	@echo "Training complete"
 
-# Launch Jupyter notebook
+reproduce:
+	@echo "Running primary-model reproduction workflow..."
+	bash scripts/run_v13_primary.sh
+
+temporal:
+	@echo "Running same-source temporal validation workflow..."
+	bash scripts/run_external_validation.sh
+
 notebook:
-	@echo "📓 Launching Jupyter notebook..."
+	@echo "Launching Jupyter notebook..."
 	jupyter notebook notebooks/00_nhanes_periodontitis_end_to_end.ipynb
 
-# Generate figures
 figures:
-	@echo "📊 Generating publication figures..."
-	@echo "TODO: Add script to regenerate all figures from saved results"
-	@echo "✅ Figures generated in figures/"
+	@echo "Generating publication figures..."
+	@echo "Figure regeneration remains notebook-backed; see notebooks/00_nhanes_periodontitis_end_to_end.ipynb"
 
-# Clean generated files
+manuscript:
+	@echo "Rendering manuscript if pandoc is installed..."
+	python3 scripts/05_number_manuscript_lines.py
+	@if command -v pandoc >/dev/null 2>&1; then \
+		mkdir -p reports; \
+		pandoc docs/publication/ARTICLE_DRAFT.md \
+			--number-sections \
+			--pdf-engine=xelatex \
+			-V geometry:margin=1in \
+			-o reports/manuscript_publication_repair.pdf; \
+		echo "Rendered reports/manuscript_publication_repair.pdf"; \
+	else \
+		echo "pandoc is not installed; manuscript source is docs/publication/ARTICLE_DRAFT.md"; \
+	fi
+
 clean:
-	@echo "🧹 Cleaning generated files..."
-	rm -rf figures/*.png
+	@echo "Cleaning generated local artifacts..."
 	rm -rf models/*.pkl
-	rm -rf results/*.json results/*.csv
+	rm -rf models/*.json
 	rm -rf artifacts/*.pkl
+	rm -rf artifacts/*.npy
+	rm -rf artifacts/*.db
 	rm -rf logs/*.log
-	@echo "✅ Clean complete"
+	rm -rf reports/*.pdf reports/*.html
+	@echo "Clean complete"
 
-# Freeze package versions
-freeze:
-	@echo "❄️  Freezing package versions..."
-	./venv/bin/pip freeze > requirements.txt
-	@echo "✅ requirements.txt updated"
+lock:
+	@echo "Freezing package versions..."
+	./venv/bin/pip freeze > requirements.lock.txt
+	@echo "requirements.lock.txt updated"
 
-# Create all necessary directories
 dirs:
-	@echo "📁 Creating project directories..."
+	@echo "Creating project directories..."
 	mkdir -p configs figures models results artifacts logs reports data/raw data/processed notebooks src tests
-	@echo "✅ Directories created"
-
+	@echo "Directories created"

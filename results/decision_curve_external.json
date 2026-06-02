@@ -1,6 +1,7 @@
 {
   "model": "v1.3_primary",
-  "dataset": "NHANES 2009-2010 (external)",
+  "dataset": "NHANES 2009-2010",
+  "validation_design": "same-source temporal validation",
   "description": "Decision curve analysis showing net benefit vs treat-all and treat-none",
   "data_summary": {
     "model_at_0.35": 0.5142793591702226,

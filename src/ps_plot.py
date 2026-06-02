@@ -172,8 +172,6 @@ def get_palette() -> Dict[str, str]:
             periospot_dark_blue: #02011e
             periospot_yellow: #ffc430
             periospot_bright_blue: #1040dd
-    TODO: Extract palette from config
-    TODO: Return as dict with color_name -> hex_code
     """
     config = load_config()
     palette = config.get('plotting', {}).get('palette', {})
@@ -290,7 +288,7 @@ def save_figure(
     
     # Save figure
     fig.savefig(filepath, dpi=dpi, bbox_inches=bbox_inches, **kwargs)
-    print(f"📊 Saved figure: {filepath}")
+    print(f"Saved figure: {filepath}")
 
 
 def apply_periospot_colors_to_ax(ax, color_key: str = "periospot_blue") -> None:
@@ -338,18 +336,12 @@ def demo():
     Demo function showing how to use these helpers.
     Run this in a notebook cell to verify style setup.
     """
-    # TODO: Uncomment and test
-    # set_style()
-    # palette = get_palette()
-    # print("Periospot Palette:")
-    # for name, hex_code in palette.items():
-    #     print(f"  {name}: {hex_code}")
-    #
-    # fig, ax = styled_fig_ax(figsize=(8, 5))
-    # ax.plot([1, 2, 3], [1, 4, 2], linewidth=2, color=palette['periospot_blue'])
-    # ax.set_title("Demo Plot with Periospot Blue")
-    # ax.set_xlabel("X Axis")
-    # ax.set_ylabel("Y Axis")
-    # save_figure(fig, "figures/demo_plot.png")
-    pass
-
+    set_style()
+    palette = get_palette()
+    fig, ax = styled_fig_ax(figsize=(8, 5))
+    ax.plot([1, 2, 3], [1, 4, 2], linewidth=2, color=palette["periospot_blue"])
+    ax.set_title("Demo Plot")
+    ax.set_xlabel("X Axis")
+    ax.set_ylabel("Y Axis")
+    save_figure(fig, "figures/demo_plot.png")
+    return fig, ax

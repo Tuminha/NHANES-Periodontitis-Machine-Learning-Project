@@ -252,13 +252,13 @@ def label_periodontitis(df: pd.DataFrame) -> pd.DataFrame:
         3. If not moderate, check mild
         4. Otherwise, none
     """
-    print("🦷 Applying CDC/AAP periodontitis case definitions...")
+    print("Applying CDC/AAP periodontitis case definitions...")
     
     # Check that required periodontal variables exist
     pd_vars, cal_vars = build_variable_lists()
     missing_vars = set(pd_vars + cal_vars) - set(df.columns)
     if missing_vars:
-        print(f"⚠️  Warning: {len(missing_vars)} periodontal variables missing from dataset")
+        print(f"Warning: {len(missing_vars)} periodontal variables missing from dataset")
         print(f"   First 10 missing: {list(missing_vars)[:10]}")
         print("   Proceeding with available data...")
     
@@ -293,7 +293,7 @@ def label_periodontitis(df: pd.DataFrame) -> pd.DataFrame:
     df.drop(columns=['is_severe', 'is_moderate', 'is_mild'], inplace=True)
     
     # Print summary statistics
-    print("\n📊 Periodontitis Classification Summary:")
+    print("\nPeriodontitis Classification Summary:")
     print(df['perio_class'].value_counts().sort_index())
     print(f"\n   Overall Prevalence: {df['has_periodontitis'].mean():.2%}")
     print(f"   Sample Size: {len(df)} participants\n")
@@ -318,16 +318,30 @@ def create_synthetic_test_cases() -> pd.DataFrame:
     
     Use this to write unit tests in tests/test_labels.py
     
-    TODO: Create synthetic rows with explicit PD and CAL values
-    TODO: Ensure each row meets known classification criteria
-    TODO: Return as DataFrame with proper NHANES variable names
     """
-    # TODO: Build a dict or list of dicts with synthetic data
-    # TODO: For example:
-    #       Row 0 (severe): CAL=7 at teeth 2,3 (mesial), PD=6 at tooth 2 (mesial)
-    #       Row 1 (moderate): CAL=5 at teeth 4,5 (mesial)
-    #       Row 2 (mild): CAL=3.5 at teeth 6,7 (mesial), PD=4.5 at teeth 6,7 (distal)
-    #       Row 3 (none): CAL=1, PD=2 everywhere
-    # TODO: Return pd.DataFrame with these rows
-    pass
+    def healthy_row() -> dict:
+        row = {}
+        for tooth in VALID_TEETH:
+            for site in INTERPROXIMAL_SITES:
+                row[f"OHX{tooth:02d}LA{site}"] = 1.0
+                row[f"OHX{tooth:02d}PC{site}"] = 2.0
+        return row
 
+    severe = healthy_row()
+    severe["OHX02LAM"] = 7.0
+    severe["OHX03LAM"] = 7.0
+    severe["OHX02PCM"] = 6.0
+
+    moderate = healthy_row()
+    moderate["OHX04LAM"] = 5.0
+    moderate["OHX05LAM"] = 5.0
+
+    mild = healthy_row()
+    mild["OHX06LAM"] = 3.0
+    mild["OHX07LAM"] = 3.0
+    mild["OHX06PCM"] = 4.0
+    mild["OHX07PCM"] = 4.0
+
+    none = healthy_row()
+
+    return pd.DataFrame([severe, moderate, mild, none])
