@@ -24,12 +24,12 @@ echo ""
 
 # Check Python version
 echo "Python version:"
-python3 --version
+"${PYTHON:-python3}" --version
 echo ""
 
 # Check dependencies
 echo "Checking dependencies..."
-python3 -c "
+"${PYTHON:-python3}" -c "
 import pandas, numpy, sklearn, xgboost, catboost, lightgbm, optuna, shap
 print('  pandas:', pandas.__version__)
 print('  numpy:', numpy.__version__)

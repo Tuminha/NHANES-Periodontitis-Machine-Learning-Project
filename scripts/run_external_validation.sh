@@ -4,7 +4,7 @@
 # ==============================================================================
 # 
 # This script runs the temporal validation Python workflow non-interactively,
-# generating all figures and result files.
+# generating the canonical temporal-validation result files.
 #
 # Usage:
 #   bash scripts/run_external_validation.sh
@@ -14,8 +14,6 @@
 #   - results/external_0910_metrics.json
 #   - results/prevalence_check.json
 #   - results/decision_curve_external.json
-#   - figures/external_roc_pr_calibration.png
-#   - figures/decision_curve_external.png
 # ==============================================================================
 
 set -e  # Exit on error
@@ -45,8 +43,6 @@ FILES=(
     "results/external_0910_metrics.json"
     "results/prevalence_check.json"
     "results/decision_curve_external.json"
-    "figures/external_roc_pr_calibration.png"
-    "figures/decision_curve_external.png"
 )
 
 for file in "${FILES[@]}"; do
