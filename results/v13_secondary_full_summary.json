@@ -1,65 +1,60 @@
 {
   "model": "v1.3_secondary_full_features",
-  "description": "Secondary model - includes reverse-causality features for comparison",
+  "description": "Secondary upper-bound model including treatment-seeking variables",
   "dataset": "NHANES 2011-2014",
-  "n_samples": 9379,
+  "n_samples": 9034,
   "n_features": 33,
-  "prevalence": 0.683,
+  "prevalence": 0.7089882665485941,
+  "metrics": {
+    "auc_roc": 0.6995820353595235,
+    "pr_auc": 0.8294776042045284,
+    "brier_score": 0.18439499071448648
+  },
+  "operating_points": {
+    "rule_out": {
+      "name": "High-sensitivity triage",
+      "threshold": 0.37,
+      "recall": 0.9729898516783763,
+      "specificity": 0.12666413084823128,
+      "precision": 0.7307692307692307,
+      "npv": 0.658102766798419,
+      "f1": 0.8346614879796425,
+      "use_case": "Triage operating point; periodontal examination remains required."
+    },
+    "balanced": {
+      "name": "Balanced triage",
+      "threshold": 0.67,
+      "recall": 0.6919594067135051,
+      "specificity": 0.606694560669456,
+      "precision": 0.8108305890962313,
+      "npv": 0.4470291479820628,
+      "f1": 0.7466936231151545,
+      "use_case": "Triage operating point; periodontal examination remains required."
+    }
+  },
+  "confusion_matrix": {
+    "rule_out": {
+      "threshold": 0.37,
+      "tp": 6232,
+      "fp": 2296,
+      "tn": 333,
+      "fn": 173
+    },
+    "balanced": {
+      "threshold": 0.67,
+      "tp": 4432,
+      "fp": 1034,
+      "tn": 1595,
+      "fn": 1973
+    }
+  },
+  "calibration": "nested_isotonic_regression",
+  "timestamp": "2026-06-02T08:17:59+00:00",
   "additional_features": [
     "dental_visit",
     "floss_days",
     "mobile_teeth",
     "floss_days_missing"
   ],
-  "rationale": "Establishes upper bound and quantifies ~1% AUC contribution from reverse-causality variables",
-  "metrics": {
-    "auc_roc": 0.7255,
-    "pr_auc": 0.8207,
-    "brier_score": 0.1793
-  },
-  "operating_points": {
-    "rule_out": {
-      "name": "Rule-Out (High Sensitivity)",
-      "threshold": 0.37,
-      "recall": 0.9877,
-      "specificity": 0.168,
-      "precision": 0.706,
-      "npv": 0.83,
-      "f1": 0.824,
-      "use_case": "High-sensitivity triage; periodontal examination remains required."
-    },
-    "balanced": {
-      "name": "Balanced (Youden J)",
-      "threshold": 0.67,
-      "recall": 0.754,
-      "specificity": 0.577,
-      "precision": 0.79,
-      "npv": 0.52,
-      "f1": 0.772,
-      "youden_j": 0.331,
-      "use_case": "Balanced triage; periodontal examination remains required."
-    }
-  },
-  "confusion_matrix": {
-    "rule_out": {
-      "threshold": 0.37,
-      "tp": 6326,
-      "fp": 2475,
-      "tn": 499,
-      "fn": 79
-    },
-    "balanced": {
-      "threshold": 0.67,
-      "tp": 4832,
-      "fp": 1258,
-      "tn": 1716,
-      "fn": 1573
-    }
-  },
-  "calibration": "isotonic_regression",
-  "monotonic_constraints": {
-    "increasing": ["age", "bmi", "waist_cm", "waist_height", "systolic_bp", "diastolic_bp", "glucose", "triglycerides"],
-    "decreasing": ["hdl"]
-  },
-  "timestamp": "2025-12-02T00:00:00Z"
+  "rationale": "Upper-bound sensitivity analysis for treatment-seeking variables."
 }

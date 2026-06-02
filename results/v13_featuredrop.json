@@ -1,23 +1,23 @@
 {
   "v1.3_full": {
-    "name": "v1.3_full",
+    "name": "secondary",
     "n_features": 33,
-    "auc": 0.7255326805774952,
-    "pr_auc": 0.8207039298134957,
-    "rule_out_recall": 0.9876658860265418,
-    "rule_out_specificity": 0.16778749159381304,
-    "balanced_recall": 0.7542544886807182,
-    "balanced_specificity": 0.5773369199731002
+    "auc": 0.6995820353595235,
+    "pr_auc": 0.8294776042045284,
+    "rule_out_recall": 0.9729898516783763,
+    "rule_out_specificity": 0.12666413084823128,
+    "balanced_recall": 0.6919594067135051,
+    "balanced_specificity": 0.606694560669456
   },
   "v1.3_no_reverse_causality": {
-    "name": "v1.3_no_reverse_causality",
+    "name": "primary",
     "n_features": 29,
-    "auc": 0.717245742046474,
-    "pr_auc": 0.8157447372867956,
-    "rule_out_recall": 0.9990632318501171,
-    "rule_out_specificity": 0.12441156691324814,
-    "balanced_recall": 0.7283372365339579,
-    "balanced_specificity": 0.5921318090114324
+    "auc": 0.6896307296060366,
+    "pr_auc": 0.8239764216424541,
+    "rule_out_recall": 0.986104605776737,
+    "rule_out_specificity": 0.06466337010270065,
+    "balanced_recall": 0.75160031225605,
+    "balanced_specificity": 0.5195891974134652
   },
   "dropped_features": [
     "dental_visit",
@@ -26,9 +26,10 @@
     "floss_days_missing"
   ],
   "deltas": {
-    "auc": -0.008286938531021248,
-    "pr_auc": -0.004959192526700074,
-    "rule_out_recall": 0.011397345823575322,
-    "balanced_specificity": 0.014794889038332149
-  }
+    "auc": -0.009951305753486905,
+    "pr_auc": -0.005501182562074325,
+    "rule_out_recall": 0.013114754098360715,
+    "balanced_specificity": -0.08710536325599083
+  },
+  "timestamp": "2026-06-02T08:17:59+00:00"
 }

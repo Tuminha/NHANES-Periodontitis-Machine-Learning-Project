@@ -8,11 +8,11 @@
 0008  
 0009  **Background:** Machine-learning studies for periodontitis prediction have reported very high internal discrimination using low-cost NHANES predictors. Such estimates require careful reassessment because internal validation, missing-data handling, calibration, and treatment-seeking predictors can materially change apparent performance.
 0010  
-0011  **Methods:** We analyzed NHANES 2011-2014 adults age 30 years or older with full periodontal examinations (`n=9,379`). Periodontitis was classified using CDC/AAP case definitions. XGBoost, LightGBM, and CatBoost were compared with logistic regression and random forest using stratified 5-fold cross-validation. The primary calibrated ensemble excluded treatment-seeking variables and used 29 predictors. A secondary 33-feature model restored dental visit, flossing, loose teeth, and floss-missing variables to estimate their incremental contribution. The frozen primary model was evaluated on NHANES 2009-2010 (`n=5,177`) as same-source temporal validation. Missingness ablations and deployment-ready feature analysis were used to assess whether NHANES missingness patterns contributed survey-specific signal.
+0011  **Methods:** We analyzed NHANES 2011-2014 adults age 30 years or older with full periodontal examinations (`n=9,034`). Periodontitis was classified using CDC/AAP case definitions. XGBoost, LightGBM, and CatBoost were compared using stratified 5-fold cross-validation. The primary calibrated ensemble excluded treatment-seeking variables and used 29 predictors. A secondary 33-feature model restored dental visit, flossing, loose teeth, and floss-missing variables to estimate their incremental contribution. The frozen primary model was evaluated on NHANES 2009-2010 (`n=5,037`) as same-source temporal validation. Missingness ablations and deployment-ready feature analysis were used to assess whether NHANES missingness patterns contributed survey-specific signal.
 0012  
-0013  **Results:** The primary 29-feature model achieved internal AUC-ROC 0.7172 and PR-AUC 0.8157. The secondary 33-feature model achieved AUC-ROC 0.7255 and PR-AUC 0.8207, indicating that treatment-seeking variables added only 0.0083 AUC. In same-source temporal validation, the frozen primary model achieved AUC-ROC 0.6771, PR-AUC 0.7735, and Brier score 0.2003. At threshold 0.35, sensitivity was 97.1% and specificity was 18.1%; at threshold 0.65, sensitivity was 82.6% and specificity was 43.3%. These operating points are not diagnostic rules and require periodontal examination for confirmation.
+0013  **Results:** The primary 29-feature model achieved internal AUC-ROC 0.6896 and PR-AUC 0.8240. The secondary 33-feature model achieved AUC-ROC 0.6996 and PR-AUC 0.8295, indicating that treatment-seeking variables added 0.0100 AUC. In same-source temporal validation, the frozen primary model achieved AUC-ROC 0.6495, PR-AUC 0.7727, and Brier score 0.2023. At threshold 0.35, sensitivity was 98.9% and specificity was 5.5%; at threshold 0.65, sensitivity was 77.7% and specificity was 45.2%. These operating points are not diagnostic rules and require periodontal examination for confirmation.
 0014  
-0015  **Conclusions:** Low-cost NHANES predictors appear to support realistic discrimination around 0.72 internally and 0.68 under same-source temporal validation. The study is best interpreted as a benchmark and cautionary methods report, not as evidence that a deployable diagnostic screening model has been established. Geographic validation, prospective clinical validation, local recalibration, subgroup calibration, and survey-weighted sensitivity analyses remain necessary before implementation claims.
+0015  **Conclusions:** Low-cost NHANES predictors appear to support realistic discrimination around 0.69 internally and 0.65 under same-source temporal validation. The study is best interpreted as a benchmark and cautionary methods report, not as evidence that a deployable diagnostic screening model has been established. Geographic validation, prospective clinical validation, local recalibration, and subgroup calibration remain necessary before implementation claims.
 0016  
 0017  **Keywords:** periodontitis; NHANES; prediction model; gradient boosting; calibration; missing data; TRIPOD+AI
 0018  
@@ -40,9 +40,9 @@
 0040  
 0041  ### 2.2 Participants
 0042  
-0043  Eligible participants were adults age 30 years or older with full periodontal examination data and sufficient information for CDC/AAP periodontitis classification. The development cohort included 9,379 participants. The same-source temporal validation cohort included 5,177 participants.
+0043  Eligible participants were adults age 30 years or older with full periodontal examination data and sufficient information for CDC/AAP periodontitis classification. The development cohort included 9,034 participants. The same-source temporal validation cohort included 5,037 participants.
 0044  
-0045  The analytic prevalence of periodontitis was approximately 67-68%, higher than general-population CDC estimates. This reflects the restricted full-examination analytic sample and should not be interpreted as the expected prevalence in a lower-risk screening population.
+0045  The analytic prevalence of periodontitis was approximately 69-72% unweighted and approximately 66% after applying examination weights by cycle, higher than general-population CDC estimates. This reflects the restricted full-examination analytic sample and should not be interpreted as the expected prevalence in a lower-risk screening population.
 0046  
 0047  ### 2.3 Outcome Definition
 0048  
@@ -77,50 +77,50 @@
 0077  
 0078  Discrimination was summarized with AUC-ROC and PR-AUC. Calibration was summarized with Brier score and reliability plots. Operating points were reported using sensitivity, specificity, PPV, and NPV. Decision-curve analysis was included as a descriptive utility analysis only.
 0079  
-0080  Survey-weighted prevalence and subgroup performance are generated by `scripts/04_publication_analyses.py` when processed prediction tables are available. These analyses should be regenerated immediately before journal submission.
+0080  Survey-weighted prevalence and subgroup performance are generated by `scripts/04_publication_analyses.py` when processed prediction tables are available. The current regenerated summary is saved in `results/publication_sensitivity_tables.md`.
 0081  
 0082  ## 3. Results
 0083  
 0084  ### 3.1 Cohorts
 0085  
-0086  The development cohort included 9,379 adults from NHANES 2011-2014. The temporal validation cohort included 5,177 adults from NHANES 2009-2010. Periodontitis prevalence was 68.3% in development data and 67.2% in temporal validation data.
+0086  The development cohort included 9,034 adults from NHANES 2011-2014. The temporal validation cohort included 5,037 adults from NHANES 2009-2010. Periodontitis prevalence was 70.9% in development data and 69.1% in temporal validation data before survey weighting.
 0087  
 0088  ### 3.2 Internal Model Performance
 0089  
 0090  | Model variant | Features | AUC-ROC | PR-AUC | Interpretation |
 0091  |---|---:|---:|---:|---|
-0092  | Primary model without treatment-seeking variables | 29 | 0.7172 | 0.8157 | Preferred benchmark model |
-0093  | Secondary full-feature model | 33 | 0.7255 | 0.8207 | Upper-bound sensitivity analysis |
-0094  | Deployment-ready core model | 15 | 0.6692 | 0.8137 | Conservative feature set without missingness indicators |
+0092  | Primary model without treatment-seeking variables | 29 | 0.6896 | 0.8240 | Preferred benchmark model |
+0093  | Secondary full-feature model | 33 | 0.6996 | 0.8295 | Upper-bound sensitivity analysis |
+0094  | Deployment-ready core model | 15 | 0.6896 | 0.8237 | Conservative feature set without missingness indicators |
 0095  
-0096  The full-feature model improved AUC by 0.0083 over the primary model. This small difference supports excluding treatment-seeking variables from the primary benchmark.
+0096  The full-feature model improved AUC by 0.0100 over the primary model. This small difference supports excluding treatment-seeking variables from the primary benchmark.
 0097  
 0098  ### 3.3 Same-Source Temporal Validation
 0099  
 0100  | Metric | Development estimate | Temporal validation estimate |
 0101  |---|---:|---:|
-0102  | N | 9,379 | 5,177 |
-0103  | Prevalence | 68.3% | 67.2% |
-0104  | AUC-ROC | 0.7172 | 0.6771 (95% CI 0.6612-0.6934) |
-0105  | PR-AUC | 0.8157 | 0.7735 (95% CI 0.7571-0.7892) |
-0106  | Brier score | 0.1812 | 0.2003 (95% CI 0.1935-0.2073) |
+0102  | N | 9,034 | 5,037 |
+0103  | Prevalence | 70.9% | 69.1% |
+0104  | AUC-ROC | 0.6896 | 0.6495 (95% CI 0.6315-0.6664) |
+0105  | PR-AUC | 0.8240 | 0.7727 (95% CI 0.7570-0.7885) |
+0106  | Brier score | 0.1871 | 0.2023 (95% CI 0.1955-0.2085) |
 0107  
-0108  The drop from internal AUC 0.7172 to temporal AUC 0.6771 is consistent with a modest but meaningful generalization gap.
+0108  The drop from internal AUC 0.6896 to temporal AUC 0.6495 is consistent with a modest but meaningful generalization gap.
 0109  
 0110  ### 3.4 Operating Points
 0111  
 0112  | Threshold | Sensitivity | Specificity | PPV | NPV |
 0113  |---:|---:|---:|---:|---:|
-0114  | 0.35 | 97.1% | 18.1% | 70.8% | 75.2% |
-0115  | 0.65 | 82.6% | 43.3% | 74.9% | 54.9% |
+0114  | 0.35 | 98.9% | 5.5% | 70.0% | 69.1% |
+0115  | 0.65 | 77.7% | 45.2% | 76.0% | 47.5% |
 0116  
-0117  The 0.35 threshold prioritizes sensitivity but has very low specificity and an NPV of only 75.2% in this high-prevalence cohort. It should be described as a high-sensitivity triage operating point, not a reliable disease-exclusion rule.
+0117  The 0.35 threshold prioritizes sensitivity but has very low specificity and an NPV of only 69.1% in this high-prevalence cohort. It should be described as a high-sensitivity triage operating point, not a reliable disease-exclusion rule.
 0118  
 0119  ### 3.5 Missingness and Survey-Design Sensitivity
 0120  
 0121  Missingness indicators contributed limited but measurable predictive signal. Missingness patterns were broadly comparable between the development and temporal validation cohorts, but the signal may still be NHANES-specific. The deployment-ready 15-feature model remains the most conservative estimate for settings where NHANES missingness patterns are unavailable.
 0122  
-0123  Survey-weighted prevalence and subgroup-performance tables should be generated from processed prediction data before submission. The repository now includes reusable code for these analyses, but the current manuscript should not claim population-level transportability until those tables are complete and reviewed.
+0123  Survey-weighted prevalence and subgroup-performance tables were generated from processed prediction data and are saved in `results/publication_sensitivity_tables.md`. Weighted prevalence was approximately 65.6% in 2009-2010 and 66.2-66.3% in 2011-2014. Subgroup analyses are descriptive and should not be overinterpreted as evidence of transportability.
 0124  
 0125  ## 4. Discussion
 0126  
@@ -141,7 +141,7 @@
 0141  
 0142  ## 6. Conclusions
 0143  
-0144  The primary 29-feature model achieved AUC-ROC 0.7172 internally and 0.6771 under same-source temporal validation. A secondary 33-feature model provided only a small apparent gain, supporting exclusion of treatment-seeking variables from the preferred benchmark. These results support a cautious methodological conclusion: low-cost NHANES predictors provide moderate discrimination and are useful for benchmarking, but they do not establish a clinically ready periodontitis screening system.
+0144  The primary 29-feature model achieved AUC-ROC 0.6896 internally and 0.6495 under same-source temporal validation. A secondary 33-feature model provided only a small apparent gain, supporting exclusion of treatment-seeking variables from the preferred benchmark. These results support a cautious methodological conclusion: low-cost NHANES predictors provide moderate discrimination and are useful for benchmarking, but they do not establish a clinically ready periodontitis screening system.
 0145  
 0146  ## Data and Code Availability
 0147  

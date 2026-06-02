@@ -27,6 +27,7 @@ PUBLICATION_FILES = [
     ROOT / "results/v13_primary_norc_summary.json",
     ROOT / "results/v13_secondary_full_summary.json",
     ROOT / "results/external_0910_metrics.json",
+    ROOT / "results/publication_sensitivity_tables.md",
 ]
 
 
@@ -67,6 +68,25 @@ def check_temporal_metric_shape() -> None:
                 raise AssertionError(f"Temporal operating point {point} missing {field}")
 
 
+def check_publication_analysis_outputs() -> None:
+    path = ROOT / "results/publication_sensitivity_tables.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    prevalence = payload.get("prevalence_by_cycle", [])
+    subgroup = payload.get("subgroup_performance", [])
+    if not prevalence:
+        raise AssertionError("Publication sensitivity output is missing prevalence_by_cycle rows.")
+    if not subgroup:
+        raise AssertionError("Publication sensitivity output is missing subgroup_performance rows.")
+    for row in prevalence:
+        if "weighted_prevalence" not in row:
+            raise AssertionError("Publication prevalence row missing weighted_prevalence.")
+    subgroup_variables = {row.get("subgroup_variable") for row in subgroup}
+    required = {"age_group", "sex", "education", "smoking", "metabolic_risk"}
+    missing = required - subgroup_variables
+    if missing:
+        raise AssertionError(f"Publication subgroup output missing strata: {sorted(missing)}")
+
+
 def check_publication_wording() -> None:
     banned = ["Publication Ready", "External Validation", "clinical deployment", "negative result rules out"]
     for path in PUBLICATION_FILES:
@@ -103,6 +123,7 @@ def main() -> None:
     check_docs()
     check_reproduction_hooks()
     check_temporal_metric_shape()
+    check_publication_analysis_outputs()
     check_publication_wording()
     check_nhanes_urls()
     check_manuscript_render_support()

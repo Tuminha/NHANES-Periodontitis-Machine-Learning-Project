@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 PYTHON ?= ./venv/bin/python
 
 .PHONY: help setup setup-lock download process train reproduce temporal test consistency verify-submission reproduce-full notebook clean figures lock dirs manuscript
@@ -89,7 +90,8 @@ temporal:
 
 reproduce-full:
 	@mkdir -p logs
-	@LOG="logs/full_reproduction_$$(date -u +%Y%m%dT%H%M%SZ).log"; \
+	@set -euo pipefail; \
+	LOG="logs/full_reproduction_$$(date -u +%Y%m%dT%H%M%SZ).log"; \
 	echo "Writing full reproduction log to $$LOG"; \
 	{ \
 		$(MAKE) download; \

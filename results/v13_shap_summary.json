@@ -1,52 +1,55 @@
 {
-  "model": "LightGBM_v1.3_monotonic",
-  "n_samples": 9379,
+  "model": "v1.3_secondary_full_features",
+  "importance_method": "mean_tree_feature_importance",
+  "n_samples": 9034,
   "n_features": 33,
   "top_10_features": [
     {
-      "feature": "age",
-      "mean_abs_shap": 0.3185195974045061
-    },
-    {
-      "feature": "alcohol",
-      "mean_abs_shap": 0.2554450040004494
-    },
-    {
-      "feature": "height_cm",
-      "mean_abs_shap": 0.14800143393819168
-    },
-    {
-      "feature": "dental_visit",
-      "mean_abs_shap": 0.14748755500803817
-    },
-    {
-      "feature": "education",
-      "mean_abs_shap": 0.11887453217779864
-    },
-    {
-      "feature": "smoking",
-      "mean_abs_shap": 0.11271073472649758
+      "feature": "hdl",
+      "mean_model_importance": 214.7907644405308
     },
     {
       "feature": "systolic_bp",
-      "mean_abs_shap": 0.08569929929007113
+      "mean_model_importance": 197.13922753260897
     },
     {
-      "feature": "hdl",
-      "mean_abs_shap": 0.06925773015232965
-    },
-    {
-      "feature": "floss_days",
-      "mean_abs_shap": 0.062162435754803326
+      "feature": "height_cm",
+      "mean_model_importance": 189.08594772124522
     },
     {
       "feature": "bmi",
-      "mean_abs_shap": 0.05943293643976315
+      "mean_model_importance": 186.07201828044742
+    },
+    {
+      "feature": "waist_cm",
+      "mean_model_importance": 178.39324953240362
+    },
+    {
+      "feature": "diastolic_bp",
+      "mean_model_importance": 178.26180264671208
+    },
+    {
+      "feature": "waist_height",
+      "mean_model_importance": 177.5775224485836
+    },
+    {
+      "feature": "age",
+      "mean_model_importance": 157.10600473349473
+    },
+    {
+      "feature": "glucose",
+      "mean_model_importance": 137.70363017852924
+    },
+    {
+      "feature": "triglycerides",
+      "mean_model_importance": 136.4529059565409
     }
   ],
-  "reverse_causality_features": {
-    "dental_visit": 0.14748755500803817,
-    "floss_days": 0.062162435754803326,
-    "mobile_teeth": 0.01172740070368736
-  }
+  "treatment_seeking_features": [
+    "dental_visit",
+    "floss_days",
+    "mobile_teeth",
+    "floss_days_missing"
+  ],
+  "timestamp": "2026-06-02T08:18:09+00:00"
 }

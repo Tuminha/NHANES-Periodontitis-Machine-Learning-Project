@@ -1,25 +1,87 @@
 {
   "description": "Per-feature NaN rates: NHANES 2011-2014 training data vs 2009-2010 same-source temporal validation data",
   "feature_nan_rates": {
-    "age": {"train_2011_2014": 0.0, "temporal_2009_2010": 0.0, "delta": 0.0},
-    "sex": {"train_2011_2014": 0.0, "temporal_2009_2010": 0.0, "delta": 0.0},
-    "education": {"train_2011_2014": 0.0, "temporal_2009_2010": 0.0, "delta": 0.0},
-    "bmi": {"train_2011_2014": 6.1, "temporal_2009_2010": 5.8, "delta": -0.3},
-    "waist_cm": {"train_2011_2014": 10.9, "temporal_2009_2010": 11.2, "delta": 0.3},
-    "height_cm": {"train_2011_2014": 6.1, "temporal_2009_2010": 5.8, "delta": -0.3},
-    "systolic_bp": {"train_2011_2014": 12.5, "temporal_2009_2010": 13.1, "delta": 0.6},
-    "diastolic_bp": {"train_2011_2014": 12.5, "temporal_2009_2010": 13.1, "delta": 0.6},
-    "glucose": {"train_2011_2014": 55.2, "temporal_2009_2010": 54.8, "delta": -0.4},
-    "triglycerides": {"train_2011_2014": 55.8, "temporal_2009_2010": 55.1, "delta": -0.7},
-    "hdl": {"train_2011_2014": 11.7, "temporal_2009_2010": 12.0, "delta": 0.3},
-    "smoking": {"train_2011_2014": 54.8, "temporal_2009_2010": 53.9, "delta": -0.9},
-    "alcohol": {"train_2011_2014": 46.3, "temporal_2009_2010": 45.7, "delta": -0.6}
+    "age": {
+      "train_2011_2014": 0.0,
+      "temporal_2009_2010": 0.0,
+      "delta": 0.0
+    },
+    "sex": {
+      "train_2011_2014": 0.0,
+      "temporal_2009_2010": 0.0,
+      "delta": 0.0
+    },
+    "education": {
+      "train_2011_2014": 0.08855435023245517,
+      "temporal_2009_2010": 0.25809013301568395,
+      "delta": 0.16953578278322878
+    },
+    "bmi": {
+      "train_2011_2014": 1.5497011290679656,
+      "temporal_2009_2010": 1.1911852293031566,
+      "delta": -0.358515899764809
+    },
+    "waist_cm": {
+      "train_2011_2014": 6.453398273190171,
+      "temporal_2009_2010": 6.1147508437562035,
+      "delta": -0.3386474294339674
+    },
+    "waist_height": {
+      "train_2011_2014": 6.641576267434138,
+      "temporal_2009_2010": 6.2735755409966245,
+      "delta": -0.36800072643751314
+    },
+    "height_cm": {
+      "train_2011_2014": 1.3283152534868277,
+      "temporal_2009_2010": 1.0720667063728408,
+      "delta": -0.2562485471139868
+    },
+    "systolic_bp": {
+      "train_2011_2014": 4.139915873367279,
+      "temporal_2009_2010": 4.5066507841969425,
+      "delta": 0.36673491082966336
+    },
+    "diastolic_bp": {
+      "train_2011_2014": 4.139915873367279,
+      "temporal_2009_2010": 4.5066507841969425,
+      "delta": 0.36673491082966336
+    },
+    "glucose": {
+      "train_2011_2014": 53.23223378348462,
+      "temporal_2009_2010": 53.841572364502674,
+      "delta": 0.6093385810180578
+    },
+    "triglycerides": {
+      "train_2011_2014": 53.77462917865841,
+      "temporal_2009_2010": 54.21878102044868,
+      "delta": 0.4441518417902728
+    },
+    "hdl": {
+      "train_2011_2014": 5.966349346911667,
+      "temporal_2009_2010": 5.955926146515783,
+      "delta": -0.010423200395883292
+    },
+    "smoke_current": {
+      "train_2011_2014": 54.52734115563427,
+      "temporal_2009_2010": 52.21361921778836,
+      "delta": -2.313721937845905
+    },
+    "smoke_former": {
+      "train_2011_2014": 0.06641576267434138,
+      "temporal_2009_2010": 0.0,
+      "delta": -0.06641576267434138
+    },
+    "alcohol_current": {
+      "train_2011_2014": 10.394066858534426,
+      "temporal_2009_2010": 12.09053007742704,
+      "delta": 1.6964632188926139
+    }
   },
   "flags": {
     "delta_exceeds_10pct": [],
-    "max_delta_feature": "smoking",
-    "max_delta_value": 0.9
+    "max_delta_feature": "smoke_current",
+    "max_delta_value": 2.313721937845905
   },
-  "interpretation": "No feature showed missingness shift exceeding 10 percentage points. Missingness patterns are comparable between training and same-source temporal validation cohorts.",
-  "timestamp": "2025-12-02"
+  "interpretation": "Missingness shift is reported descriptively; transportability remains limited to NHANES-like data.",
+  "timestamp": "2026-06-02T08:18:13+00:00"
 }

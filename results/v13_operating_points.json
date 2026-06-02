@@ -1,83 +1,76 @@
 {
   "version": "v1.3",
   "dataset": "NHANES 2011-2014",
-  "n_samples": 9379,
-  "prevalence": 0.683,
-  "calibration": "isotonic_regression",
-  "target_a_achieved": false,
-  "target_a_reason": "Cannot achieve Recall≥90% AND Specificity≥35% with this feature family",
-  "ensemble_weights": {
-    "catboost": 0.34,
-    "xgboost": 0.33,
-    "lightgbm": 0.33
-  },
-  "monotonic_constraints": {
-    "increasing": ["age", "bmi", "waist_cm", "waist_height", "systolic_bp", "diastolic_bp", "glucose", "triglycerides"],
-    "decreasing": ["hdl"]
+  "n_samples": 9034,
+  "prevalence": 0.7089882665485941,
+  "calibration": "nested_isotonic_regression",
+  "feature_sets": {
+    "deployment_ready": 15,
+    "primary": 29,
+    "secondary": 33
   },
   "models": {
     "primary": {
-      "name": "v1.3_primary_no_reverse_causality",
+      "name": "primary",
       "n_features": 29,
-      "description": "Excludes dental_visit, floss_days, mobile_teeth (treatment-seeking bias)",
       "metrics": {
-        "auc_roc": 0.7172,
-        "pr_auc": 0.8157
+        "auc_roc": 0.6896307296060366,
+        "pr_auc": 0.8239764216424541,
+        "brier_score": 0.18712707529235736
       },
       "operating_points": {
         "rule_out": {
           "threshold": 0.35,
-          "recall": 0.999,
-          "specificity": 0.124,
-          "precision": 0.692,
-          "npv": 0.96,
-          "f1": 0.818
+          "recall": 0.986104605776737,
+          "specificity": 0.06466337010270065,
+          "precision": 0.7197720797720798,
+          "f1": 0.8321475625823452
         },
         "balanced": {
           "threshold": 0.65,
-          "recall": 0.728,
-          "specificity": 0.592,
-          "precision": 0.79,
-          "npv": 0.51,
-          "f1": 0.758,
-          "youden_j": 0.32
+          "recall": 0.75160031225605,
+          "specificity": 0.5195891974134652,
+          "precision": 0.792167187757117,
+          "f1": 0.771350745072905
         }
       }
     },
     "secondary": {
-      "name": "v1.3_secondary_full_features",
+      "name": "secondary",
       "n_features": 33,
-      "description": "Includes all features (upper bound)",
       "metrics": {
-        "auc_roc": 0.7255,
-        "pr_auc": 0.8207
+        "auc_roc": 0.6995820353595235,
+        "pr_auc": 0.8294776042045284,
+        "brier_score": 0.18439499071448648
       },
       "operating_points": {
         "rule_out": {
           "threshold": 0.37,
-          "recall": 0.9877,
-          "specificity": 0.168,
-          "precision": 0.706,
-          "npv": 0.83,
-          "f1": 0.824
+          "recall": 0.9729898516783763,
+          "specificity": 0.12666413084823128,
+          "precision": 0.7307692307692307,
+          "f1": 0.8346614879796425
         },
         "balanced": {
           "threshold": 0.67,
-          "recall": 0.754,
-          "specificity": 0.577,
-          "precision": 0.79,
-          "npv": 0.52,
-          "f1": 0.772,
-          "youden_j": 0.331
+          "recall": 0.6919594067135051,
+          "specificity": 0.606694560669456,
+          "precision": 0.8108305890962313,
+          "f1": 0.7466936231151545
         }
       }
     }
   },
   "feature_drop_analysis": {
-    "dropped_features": ["dental_visit", "floss_days", "mobile_teeth", "floss_days_missing"],
-    "auc_delta": -0.0083,
-    "pr_auc_delta": -0.005,
-    "interpretation": "Reverse-causality features contribute ~1% AUC. Core risk factors drive majority of discrimination."
+    "dropped_features": [
+      "dental_visit",
+      "floss_days",
+      "mobile_teeth",
+      "floss_days_missing"
+    ],
+    "auc_delta": -0.009951305753486905,
+    "pr_auc_delta": -0.005501182562074325,
+    "interpretation": "Treatment-seeking features are reported as an upper-bound sensitivity analysis."
   },
-  "timestamp": "2025-12-02T00:00:00Z"
+  "timestamp": "2026-06-02T08:18:07+00:00"
 }
