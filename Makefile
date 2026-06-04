@@ -117,13 +117,22 @@ manuscript:
 	@echo "Rendering manuscript if pandoc is installed..."
 	$(PYTHON) scripts/05_number_manuscript_lines.py
 	@if command -v pandoc >/dev/null 2>&1; then \
+		ENGINE=""; \
+		if command -v xelatex >/dev/null 2>&1; then \
+			ENGINE="xelatex"; \
+		elif command -v tectonic >/dev/null 2>&1; then \
+			ENGINE="tectonic"; \
+		fi; \
+		if [ -z "$$ENGINE" ]; then \
+			echo "pandoc is installed, but no PDF engine found. Install xelatex or tectonic."; \
+			exit 1; \
+		fi; \
 		mkdir -p reports; \
 		pandoc docs/publication/ARTICLE_DRAFT.md \
-			--number-sections \
-			--pdf-engine=xelatex \
+			--pdf-engine=$$ENGINE \
 			-V geometry:margin=1in \
 			-o reports/manuscript_publication_repair.pdf; \
-		echo "Rendered reports/manuscript_publication_repair.pdf"; \
+		echo "Rendered reports/manuscript_publication_repair.pdf using $$ENGINE"; \
 	else \
 		echo "pandoc is not installed; manuscript source is docs/publication/ARTICLE_DRAFT.md"; \
 	fi
