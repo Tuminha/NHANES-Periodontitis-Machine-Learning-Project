@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 import matplotlib
@@ -25,6 +26,10 @@ GOLD = "#c28b12"
 GREEN = "#2f7d42"
 GRAY = "#6b7280"
 LIGHT_GRAY = "#e5e7eb"
+PDF_METADATA = {
+    "CreationDate": datetime(2026, 6, 4, tzinfo=timezone.utc),
+    "ModDate": datetime(2026, 6, 4, tzinfo=timezone.utc),
+}
 
 
 def load_json(path: str) -> dict:
@@ -82,7 +87,7 @@ def label_horizontal_bars(ax: plt.Axes, bars, fmt: str = "{:.1f}%") -> None:
 def save_figure(fig: plt.Figure, stem: str) -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIGURES / f"{stem}.png", bbox_inches="tight")
-    fig.savefig(FIGURES / f"{stem}.pdf", bbox_inches="tight")
+    fig.savefig(FIGURES / f"{stem}.pdf", bbox_inches="tight", metadata=PDF_METADATA)
     plt.close(fig)
 
 
