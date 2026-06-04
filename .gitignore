@@ -57,6 +57,7 @@ artifacts/*.npy
 artifacts/*.db
 logs/*.log
 reports/*.pdf
+reports/*.html
 
 # Keep .gitkeep files
 !.gitkeep
@@ -80,4 +81,3 @@ optuna_study.db
 *.bak
 *_OLD.*
 README_OLD.md
-
