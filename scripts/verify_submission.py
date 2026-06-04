@@ -87,6 +87,51 @@ def check_publication_analysis_outputs() -> None:
         raise AssertionError(f"Publication subgroup output missing strata: {sorted(missing)}")
 
 
+def check_publication_figures() -> None:
+    expected = [
+        ROOT / "figures/19_publication_performance_summary.png",
+        ROOT / "figures/19_publication_performance_summary.pdf",
+        ROOT / "figures/20_publication_sensitivity_summary.png",
+        ROOT / "figures/20_publication_sensitivity_summary.pdf",
+    ]
+    for path in expected:
+        if not path.exists() or path.stat().st_size < 5_000:
+            raise AssertionError(f"Publication figure missing or unexpectedly small: {path.relative_to(ROOT)}")
+
+
+def check_bmc_manuscript_sections() -> None:
+    manuscript = ROOT / "docs/publication/ARTICLE_DRAFT.md"
+    text = manuscript.read_text(encoding="utf-8")
+    required = [
+        "**Authors:** Francisco Teixeira Barbosa",
+        "**Corresponding author:**",
+        "**Trial registration:** Not applicable.",
+        "![Figure 1. Model performance summary.",
+        "![Figure 2. Survey sensitivity summary.",
+        "## List of abbreviations",
+        "## Declarations",
+        "### Ethics approval and consent to participate",
+        "### Consent for publication",
+        "### Availability of data and materials",
+        "### Competing interests",
+        "### Funding",
+        "### Authors' contributions",
+        "### Acknowledgements",
+    ]
+    missing = [needle for needle in required if needle not in text]
+    if missing:
+        raise AssertionError(f"BMC manuscript sections missing: {missing}")
+
+    abstract = text.split("## Abstract", 1)[1].split("## Background", 1)[0]
+    abstract_words = [
+        word
+        for word in abstract.replace("**", "").replace("`", "").split()
+        if word.strip()
+    ]
+    if len(abstract_words) > 350:
+        raise AssertionError(f"BMC abstract exceeds 350 words: {len(abstract_words)}")
+
+
 def check_publication_wording() -> None:
     banned = ["Publication Ready", "External Validation", "clinical deployment", "negative result rules out"]
     for path in PUBLICATION_FILES:
@@ -124,6 +169,8 @@ def main() -> None:
     check_reproduction_hooks()
     check_temporal_metric_shape()
     check_publication_analysis_outputs()
+    check_publication_figures()
+    check_bmc_manuscript_sections()
     check_publication_wording()
     check_nhanes_urls()
     check_manuscript_render_support()

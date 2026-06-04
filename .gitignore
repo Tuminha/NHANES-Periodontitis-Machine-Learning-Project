@@ -58,6 +58,7 @@ artifacts/*.db
 logs/*.log
 reports/*.pdf
 reports/*.html
+reports/*.docx
 
 # Keep .gitkeep files
 !.gitkeep
