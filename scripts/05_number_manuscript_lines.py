@@ -20,7 +20,10 @@ def main() -> None:
 
     output.parent.mkdir(parents=True, exist_ok=True)
     lines = source.read_text(encoding="utf-8").splitlines()
-    numbered = [f"{idx:04d}  {line}" for idx, line in enumerate(lines, start=1)]
+    numbered = [
+        f"{idx:04d}  {line}" if line else f"{idx:04d}"
+        for idx, line in enumerate(lines, start=1)
+    ]
     output.write_text("\n".join(numbered) + "\n", encoding="utf-8")
     print(f"Wrote {output}")
 

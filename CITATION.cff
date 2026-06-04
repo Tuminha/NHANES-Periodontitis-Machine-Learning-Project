@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "NHANES Periodontitis Prediction Benchmark"
-version: 1.3.1
-date-released: 2026-06-02
+version: 1.3.2
+date-released: 2026-06-04
 url: "https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project"
 repository-code: "https://github.com/Tuminha/NHANES-Periodontitis-Machine-Learning-Project"
 license: MIT
@@ -11,7 +11,13 @@ authors:
   - family-names: "Barbosa"
     given-names: "Francisco Teixeira"
     email: "cisco@periospot.com"
-    affiliation: "Oral Rehabilitation Foundation"
+    affiliation: "Foundation for Oral Rehabilitation; DENS-ia Research Group, Faculty of Health Sciences, Miguel de Cervantes European University"
+  - family-names: "Brizuela-Velasco"
+    given-names: "Aritza"
+    affiliation: "DENS-ia Research Group, Faculty of Health Sciences, Miguel de Cervantes European University"
+  - family-names: "Robles Cantero"
+    given-names: "Daniel"
+    affiliation: "DENS-ia Research Group, Faculty of Health Sciences, Miguel de Cervantes European University"
 keywords:
   - periodontitis
   - machine learning
@@ -33,5 +39,9 @@ preferred-citation:
     - family-names: "Barbosa"
       given-names: "Francisco Teixeira"
       email: "cisco@periospot.com"
+    - family-names: "Brizuela-Velasco"
+      given-names: "Aritza"
+    - family-names: "Robles Cantero"
+      given-names: "Daniel"
   title: "Machine Learning for Periodontitis Prediction: A Realistic Benchmark with Same-Source Temporal Validation on NHANES"
   year: 2026

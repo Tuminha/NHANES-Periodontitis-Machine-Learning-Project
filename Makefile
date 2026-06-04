@@ -111,7 +111,7 @@ notebook:
 
 figures:
 	@echo "Generating publication figures..."
-	@echo "Figure regeneration remains notebook-backed; see notebooks/00_nhanes_periodontitis_end_to_end.ipynb"
+	$(PYTHON) scripts/06_generate_publication_figures.py
 
 manuscript:
 	@echo "Rendering manuscript if pandoc is installed..."
@@ -129,6 +129,9 @@ manuscript:
 		fi; \
 		mkdir -p reports; \
 		pandoc docs/publication/ARTICLE_DRAFT.md \
+			-o reports/manuscript_bmc_submission.docx; \
+		echo "Rendered reports/manuscript_bmc_submission.docx"; \
+		pandoc docs/publication/ARTICLE_DRAFT.md \
 			--pdf-engine=$$ENGINE \
 			-V geometry:margin=1in \
 			-o reports/manuscript_publication_repair.pdf; \
@@ -145,7 +148,7 @@ clean:
 	rm -rf artifacts/*.npy
 	rm -rf artifacts/*.db
 	rm -rf logs/*.log
-	rm -rf reports/*.pdf reports/*.html
+	rm -rf reports/*.pdf reports/*.html reports/*.docx
 	@echo "Clean complete"
 
 lock:

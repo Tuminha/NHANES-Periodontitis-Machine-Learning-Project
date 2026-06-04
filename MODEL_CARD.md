@@ -78,4 +78,4 @@ The consistency check enforces agreement between result artifacts, README, this 
 
 ## AI-Use Disclosure
 
-AI systems were used as drafting and code-review aids during project development. The author remains responsible for study design, code, analysis decisions, interpretation, and manuscript claims.
+AI systems were used as drafting, figure-label review, critique, and code-review aids during project development. No AI system is listed as an author. The authors remain responsible for study design, code, analysis decisions, interpretation, and manuscript claims.
